@@ -54,9 +54,7 @@ pub fn player_movement(
         direction += Vec3::new(0.0, -1.0, 0.0);
     }
 
-    if direction.length() > 0.0 {
-        direction = direction.normalize();
-    }
+    direction = direction.normalize_or_zero();
 
     player_transform.translation += direction * PLAYER_SPEED * time.delta_seconds();
 }

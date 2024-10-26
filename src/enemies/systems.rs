@@ -46,10 +46,14 @@ pub fn enemies_movement(
     let player_translation = player_query.get_single().unwrap().translation;
 
     for mut enemy in enemy_query.iter_mut() {
-        let mut direction = player_translation - enemy.translation;
-        if direction.length() > 0.0 {
-            direction = direction.normalize();
-        }
-        enemy.translation += direction * ENEMY_SPEED * time.delta_seconds();
+        let distance = player_translation - enemy.translation;
+        let direction = distance.normalize_or_zero();
+        let mut translation_change = direction * ENEMY_SPEED * time.delta_seconds();
+        translation_change = if translation_change.length() > distance.length() {
+            distance
+        } else {
+            translation_change
+        };
+        enemy.translation += translation_change;
     }
 }
