@@ -1,15 +1,15 @@
 use bevy::{
     asset::AssetServer,
     input::ButtonInput,
-    math::Vec3,
+    math::{Vec2, Vec3},
     prelude::{Commands, KeyCode, Query, Res, Transform, Window, With},
-    sprite::SpriteBundle,
+    sprite::{Sprite, SpriteBundle},
     time::Time,
     window::PrimaryWindow,
 };
 
 use super::components::Player;
-use super::constants::{PLAYER_PICTURE_PATH, PLAYER_SPEED};
+use super::constants::{PLAYER_PICTURE_PATH, PLAYER_SPEED, PLAYER_SPRITE_DIAMETER};
 
 pub fn spawn_player(
     mut commands: Commands,
@@ -22,8 +22,13 @@ pub fn spawn_player(
     let z_position: f32 = 0.0;
 
     let player_texture = asset_server.load(PLAYER_PICTURE_PATH);
+    let sprite = Sprite {
+        custom_size: Some(Vec2::new(PLAYER_SPRITE_DIAMETER, PLAYER_SPRITE_DIAMETER)),
+        ..Default::default()
+    };
 
     let player_sprite_bundle = SpriteBundle {
+        sprite: sprite,
         transform: Transform::from_xyz(x_position, y_position, z_position),
         texture: player_texture,
         ..Default::default()
@@ -57,4 +62,23 @@ pub fn player_movement(
     direction = direction.normalize_or_zero();
 
     player_transform.translation += direction * PLAYER_SPEED * time.delta_seconds();
+}
+
+pub fn restrict_player_movement(
+    mut player_query: Query<&mut Transform, With<Player>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = window_query.get_single().unwrap();
+    let mut player_transform = player_query.get_single_mut().unwrap();
+    let player_radius = PLAYER_SPRITE_DIAMETER / 2.0;
+    let adjusted_x = player_transform
+        .translation
+        .x
+        .clamp(player_radius, window.width() - player_radius);
+    let adjusted_y = player_transform
+        .translation
+        .y
+        .clamp(player_radius, window.height() - player_radius);
+    player_transform.translation.x = adjusted_x;
+    player_transform.translation.y = adjusted_y;
 }
