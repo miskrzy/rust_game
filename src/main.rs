@@ -1,5 +1,5 @@
 use bevy::{
-    app::{Startup, Update},
+    app::Startup,
     prelude::{App, DefaultPlugins},
 };
 
@@ -9,13 +9,12 @@ mod enemies;
 mod player;
 
 use camera::spawn_camera;
-use enemies::{enemies_movement, spawn_enemies};
-use player::{player_movement, spawn_player};
+use enemies::EnemyPlugin;
+use player::PlayerPlugin;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (spawn_player, spawn_camera, spawn_enemies))
-        .add_systems(Update, (player_movement, enemies_movement))
+        .add_plugins((DefaultPlugins, PlayerPlugin, EnemyPlugin))
+        .add_systems(Startup, spawn_camera)
         .run();
 }
