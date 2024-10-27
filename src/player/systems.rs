@@ -2,7 +2,7 @@ use bevy::{
     asset::AssetServer,
     input::ButtonInput,
     math::{Vec2, Vec3},
-    prelude::{Commands, KeyCode, Query, Res, Transform, Window, With},
+    prelude::{Commands, Entity, KeyCode, Query, Res, Transform, Window, With},
     sprite::{Sprite, SpriteBundle},
     time::Time,
     window::PrimaryWindow,
@@ -44,26 +44,26 @@ pub fn movement(
     mut player_query: Query<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    let mut transform = player_query.get_single_mut().unwrap();
+    if let Ok(mut transform) = player_query.get_single_mut() {
+        let mut direction = Vec3::ZERO;
 
-    let mut direction = Vec3::ZERO;
+        if keyboard_input.pressed(KeyCode::ArrowLeft) || keyboard_input.pressed(KeyCode::KeyA) {
+            direction += Vec3::new(-1.0, 0.0, 0.0);
+        }
+        if keyboard_input.pressed(KeyCode::ArrowRight) || keyboard_input.pressed(KeyCode::KeyD) {
+            direction += Vec3::new(1.0, 0.0, 0.0);
+        }
+        if keyboard_input.pressed(KeyCode::ArrowUp) || keyboard_input.pressed(KeyCode::KeyW) {
+            direction += Vec3::new(0.0, 1.0, 0.0);
+        }
+        if keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS) {
+            direction += Vec3::new(0.0, -1.0, 0.0);
+        }
 
-    if keyboard_input.pressed(KeyCode::ArrowLeft) || keyboard_input.pressed(KeyCode::KeyA) {
-        direction += Vec3::new(-1.0, 0.0, 0.0);
-    }
-    if keyboard_input.pressed(KeyCode::ArrowRight) || keyboard_input.pressed(KeyCode::KeyD) {
-        direction += Vec3::new(1.0, 0.0, 0.0);
-    }
-    if keyboard_input.pressed(KeyCode::ArrowUp) || keyboard_input.pressed(KeyCode::KeyW) {
-        direction += Vec3::new(0.0, 1.0, 0.0);
-    }
-    if keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS) {
-        direction += Vec3::new(0.0, -1.0, 0.0);
-    }
+        direction = direction.normalize_or_zero();
 
-    direction = direction.normalize_or_zero();
-
-    transform.translation += direction * SPEED * time.delta_seconds();
+        transform.translation += direction * SPEED * time.delta_seconds();
+    }
 }
 
 pub fn restrict_movement(
@@ -71,16 +71,26 @@ pub fn restrict_movement(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.get_single().unwrap();
-    let mut transform = player_query.get_single_mut().unwrap();
-    let radius = SPRITE_DIAMETER / 2.0;
-    let adjusted_x = transform
-        .translation
-        .x
-        .clamp(radius, window.width() - radius);
-    let adjusted_y = transform
-        .translation
-        .y
-        .clamp(radius, window.height() - radius);
-    transform.translation.x = adjusted_x;
-    transform.translation.y = adjusted_y;
+    if let Ok(mut transform) = player_query.get_single_mut() {
+        let radius = SPRITE_DIAMETER / 2.0;
+        let adjusted_x = transform
+            .translation
+            .x
+            .clamp(radius, window.width() - radius);
+        let adjusted_y = transform
+            .translation
+            .y
+            .clamp(radius, window.height() - radius);
+        transform.translation.x = adjusted_x;
+        transform.translation.y = adjusted_y;
+    }
+}
+
+pub fn despawn(player_query: Query<(Entity, &Health), With<Player>>, mut commands: Commands) {
+    if let Ok((entity, health)) = player_query.get_single() {
+        if health.is_dead() {
+            commands.entity(entity).despawn();
+            println!("Player is dead");
+        }
+    }
 }

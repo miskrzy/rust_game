@@ -60,18 +60,18 @@ pub fn movement(
     player_query: Query<&Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    let player_translation = player_query.get_single().unwrap().translation;
-
-    for mut transform in enemy_query.iter_mut() {
-        let distance = player_translation - transform.translation;
-        let direction = distance.normalize_or_zero();
-        let mut translation_change = direction * SPEED * time.delta_seconds();
-        translation_change = if translation_change.length() > distance.length() {
-            distance
-        } else {
-            translation_change
-        };
-        transform.translation += translation_change;
+    if let Ok(player_transform) = player_query.get_single() {
+        for mut transform in enemy_query.iter_mut() {
+            let distance = player_transform.translation - transform.translation;
+            let direction = distance.normalize_or_zero();
+            let mut translation_change = direction * SPEED * time.delta_seconds();
+            translation_change = if translation_change.length() > distance.length() {
+                distance
+            } else {
+                translation_change
+            };
+            transform.translation += translation_change;
+        }
     }
 }
 
@@ -101,23 +101,22 @@ pub fn attack_player(
     mut player_query: Query<(&Transform, &mut Health), With<Player>>,
     time: Res<Time>,
 ) {
-    let (player_transform, mut player_health) = player_query.get_single_mut().unwrap();
-    let player_collider = BoundingCircle::new(
-        player_transform.translation.truncate(),
-        PLAYER_SPRITE_DIAMETER / 2.,
-    );
+    if let Ok((player_transform, mut player_health)) = player_query.get_single_mut() {
+        let player_collider = BoundingCircle::new(
+            player_transform.translation.truncate(),
+            PLAYER_SPRITE_DIAMETER / 2.,
+        );
 
-    for (transform, mut attack_timer) in &mut enemy_query {
-        attack_timer.timer.tick(time.delta());
+        for (transform, mut attack_timer) in &mut enemy_query {
+            attack_timer.timer.tick(time.delta());
 
-        let collider = BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
-        if collider.intersects(&player_collider) && attack_timer.timer.finished() {
-            player_health.deal_damage(DAMAGE);
-            println!("Player received {DAMAGE} damage");
-            if player_health.is_dead() {
-                println!("Player is dead!")
+            let collider =
+                BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
+            if collider.intersects(&player_collider) && attack_timer.timer.finished() {
+                player_health.deal_damage(DAMAGE);
+                println!("Player received {DAMAGE} damage");
+                attack_timer.timer.reset();
             }
-            attack_timer.timer.reset();
         }
     }
 }
