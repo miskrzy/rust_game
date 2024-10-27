@@ -4,9 +4,11 @@ use bevy::{
 };
 
 pub mod components;
-mod constants;
+pub mod constants;
 mod systems;
+
 use systems::{player_movement, restrict_player_movement, spawn_player};
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {

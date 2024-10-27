@@ -4,7 +4,6 @@ use bevy::{
 };
 
 mod camera;
-mod constants;
 mod enemies;
 mod player;
 

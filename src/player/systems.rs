@@ -17,8 +17,8 @@ pub fn spawn_player(
     asset_server: Res<AssetServer>,
 ) {
     let window = window_query.get_single().unwrap();
-    let x_position = window.width() / 2.0;
-    let y_position = window.height() / 2.0;
+    let x_position = window.width() / 2.;
+    let y_position = window.height() / 2.;
     let z_position: f32 = 0.0;
 
     let player_texture = asset_server.load(PLAYER_PICTURE_PATH);
