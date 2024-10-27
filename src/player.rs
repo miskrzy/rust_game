@@ -7,13 +7,13 @@ pub mod components;
 pub mod constants;
 mod systems;
 
-use systems::{player_movement, restrict_player_movement, spawn_player};
+use systems::{movement, restrict_movement, spawn};
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, spawn_player)
-            .add_systems(Update, (player_movement, restrict_player_movement).chain());
+        app.add_systems(Startup, spawn)
+            .add_systems(Update, (movement, restrict_movement).chain());
     }
 }

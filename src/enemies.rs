@@ -1,4 +1,4 @@
-use systems::{attack_player, enemies_movement, restrict_enemy_movement, spawn_enemies};
+use systems::{attack_player, movement, restrict_movement, spawn};
 
 use bevy::prelude::{IntoSystemConfigs, Plugin, Startup, Update};
 
@@ -10,8 +10,8 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, spawn_enemies)
-            .add_systems(Update, (enemies_movement, restrict_enemy_movement).chain())
+        app.add_systems(Startup, spawn)
+            .add_systems(Update, (movement, restrict_movement).chain())
             .add_systems(Update, attack_player);
     }
 }
