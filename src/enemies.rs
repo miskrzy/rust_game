@@ -2,7 +2,7 @@ use systems::{attack_player, movement, restrict_movement, spawn};
 
 use bevy::prelude::{IntoSystemConfigs, Plugin, Startup, Update};
 
-mod components;
+pub mod components;
 mod constants;
 mod systems;
 
