@@ -4,7 +4,7 @@ use bevy::{
     asset::AssetServer,
     math::{
         bounding::{BoundingCircle, IntersectsVolume},
-        Vec2,
+        Vec2, Vec3,
     },
     prelude::{Commands, Query, Res, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
@@ -13,12 +13,13 @@ use bevy::{
 };
 use rand::{thread_rng, Rng};
 
-use super::constants::{AMOUNT, ATTACK_SPEED, DAMAGE, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
-use crate::player::{components::Health, constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER};
+use crate::player::{
+    components::{Health, Player},
+    constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
+};
 
 use super::components::{AttackTimer, Enemy};
-
-use crate::player::components::Player;
+use super::constants::{AMOUNT, ATTACK_SPEED, DAMAGE, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
 
 pub fn spawn(
     mut commands: Commands,
@@ -62,15 +63,9 @@ pub fn movement(
 ) {
     if let Ok(player_transform) = player_query.get_single() {
         for mut transform in enemy_query.iter_mut() {
-            let distance = player_transform.translation - transform.translation;
-            let direction = distance.normalize_or_zero();
-            let mut translation_change = direction * SPEED * time.delta_seconds();
-            translation_change = if translation_change.length() > distance.length() {
-                distance
-            } else {
-                translation_change
-            };
-            transform.translation += translation_change;
+            transform.translation = transform
+                .translation
+                .move_towards(player_transform.translation, SPEED * time.delta_seconds());
         }
     }
 }
@@ -82,17 +77,19 @@ pub fn restrict_movement(
     let window = window_query.get_single().unwrap();
 
     for mut transform in enemy_query.iter_mut() {
-        let enemy_radius = SPRITE_DIAMETER / 2.;
-        let adjusted_x = transform
-            .translation
-            .x
-            .clamp(enemy_radius, window.width() - enemy_radius);
-        let adjusted_y = transform
-            .translation
-            .y
-            .clamp(enemy_radius, window.height() - enemy_radius);
-        transform.translation.x = adjusted_x;
-        transform.translation.y = adjusted_y;
+        let radius = SPRITE_DIAMETER / 2.;
+        transform.translation = transform.translation.clamp(
+            Vec3 {
+                x: radius,
+                y: radius,
+                z: 0.0,
+            },
+            Vec3 {
+                x: window.width() - radius,
+                y: window.height() - radius,
+                z: 0.0,
+            },
+        );
     }
 }
 

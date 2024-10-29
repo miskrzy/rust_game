@@ -1,15 +1,18 @@
+use std::time::Duration;
+
 use bevy::{
     asset::AssetServer,
     input::ButtonInput,
     math::{Vec2, Vec3},
     prelude::{Commands, Entity, KeyCode, Query, Res, Transform, Window, With},
     sprite::{Sprite, SpriteBundle},
-    time::Time,
+    time::{Time, Timer, TimerMode},
     window::PrimaryWindow,
 };
 
-use super::components::{Health, Player};
+use super::components::{CastTimer, Health, Player};
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use crate::projectiles::constants::CAST_SPEED;
 
 pub fn spawn(
     mut commands: Commands,
@@ -34,9 +37,13 @@ pub fn spawn(
         ..Default::default()
     };
 
-    let health = Health::initialize(INITIAL_HEALTH);
+    let health = Health::new(INITIAL_HEALTH);
 
-    commands.spawn((sprite_bundle, Player, health));
+    let projectile_cast_timer = CastTimer {
+        timer: Timer::new(Duration::from_secs_f32(1. / CAST_SPEED), TimerMode::Once),
+    };
+
+    commands.spawn((sprite_bundle, Player, health, projectile_cast_timer));
 }
 
 pub fn movement(
@@ -73,16 +80,18 @@ pub fn restrict_movement(
     let window = window_query.get_single().unwrap();
     if let Ok(mut transform) = player_query.get_single_mut() {
         let radius = SPRITE_DIAMETER / 2.0;
-        let adjusted_x = transform
-            .translation
-            .x
-            .clamp(radius, window.width() - radius);
-        let adjusted_y = transform
-            .translation
-            .y
-            .clamp(radius, window.height() - radius);
-        transform.translation.x = adjusted_x;
-        transform.translation.y = adjusted_y;
+        transform.translation = transform.translation.clamp(
+            Vec3 {
+                x: radius,
+                y: radius,
+                z: 0.0,
+            },
+            Vec3 {
+                x: window.width() - radius,
+                y: window.height() - radius,
+                z: 0.0,
+            },
+        );
     }
 }
 

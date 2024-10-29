@@ -1,4 +1,5 @@
 use bevy::prelude::Component;
+use bevy::time::Timer;
 
 #[derive(Component)]
 pub struct Player;
@@ -10,7 +11,7 @@ pub struct Health {
 }
 
 impl Health {
-    pub fn initialize(health: f32) -> Self {
+    pub fn new(health: f32) -> Self {
         Self {
             health: health,
             max_health: health,
@@ -36,4 +37,9 @@ impl Health {
             false
         }
     }
+}
+
+#[derive(Component)]
+pub struct CastTimer {
+    pub timer: Timer,
 }
