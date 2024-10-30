@@ -6,7 +6,7 @@ use bevy::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
     },
-    prelude::{Commands, Query, Res, Transform, With, Without},
+    prelude::{Commands, Query, Res, ResMut, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
     time::{Time, Timer, TimerMode},
     window::{PrimaryWindow, Window},
@@ -18,41 +18,65 @@ use crate::player::{
     constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
 };
 
-use super::components::{AttackTimer, Enemy};
-use super::constants::{AMOUNT, ATTACK_SPEED, DAMAGE, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::constants::{
+    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, SPEED, SPRITE_DIAMETER, TEXTURE_PATH,
+};
+use super::{
+    components::{AttackTimer, Enemy},
+    resources::SpawnTimer,
+};
 
-pub fn spawn(
+fn create_entity_bundle(
+    window_query: &Query<&Window, With<PrimaryWindow>>,
+    asset_server: &Res<AssetServer>,
+) -> (SpriteBundle, Enemy, AttackTimer) {
+    let mut rng_gen = thread_rng();
+    let window = window_query.get_single().unwrap();
+    let x_position = rng_gen.gen_range(0.0..window.width());
+    let y_position = rng_gen.gen_range(0.0..window.height());
+    let z_position: f32 = 0.0;
+
+    let texture = asset_server.load(TEXTURE_PATH);
+
+    let sprite = Sprite {
+        custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
+        ..Default::default()
+    };
+
+    let sprite_bundle = SpriteBundle {
+        sprite: sprite,
+        transform: Transform::from_xyz(x_position, y_position, z_position),
+        texture: texture,
+        ..Default::default()
+    };
+
+    let mut timer = Timer::new(Duration::from_secs_f32(1. / ATTACK_SPEED), TimerMode::Once);
+    timer.tick(Duration::from_secs_f32(1. / ATTACK_SPEED));
+    let attack_timer = AttackTimer { timer: timer };
+
+    (sprite_bundle, Enemy, attack_timer)
+}
+
+pub fn initial_spawn(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
 ) {
-    let mut rng_gen = thread_rng();
+    for _ in 0..INITIAL_AMOUNT {
+        commands.spawn(create_entity_bundle(&window_query, &asset_server));
+    }
+}
 
-    for _ in 0..AMOUNT {
-        let window = window_query.get_single().unwrap();
-        let x_position = rng_gen.gen_range(0.0..window.width());
-        let y_position = rng_gen.gen_range(0.0..window.height());
-        let z_position: f32 = 0.0;
-
-        let texture = asset_server.load(TEXTURE_PATH);
-
-        let sprite = Sprite {
-            custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
-            ..Default::default()
-        };
-
-        let sprite_bundle = SpriteBundle {
-            sprite: sprite,
-            transform: Transform::from_xyz(x_position, y_position, z_position),
-            texture: texture,
-            ..Default::default()
-        };
-
-        let attack_timer = AttackTimer {
-            timer: Timer::new(Duration::from_secs_f32(1. / ATTACK_SPEED), TimerMode::Once),
-        };
-
-        commands.spawn((sprite_bundle, Enemy, attack_timer));
+pub fn spawn_over_time(
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
+    mut spawn_timer: ResMut<SpawnTimer>,
+    time: Res<Time>,
+) {
+    spawn_timer.timer.tick(time.delta());
+    if spawn_timer.timer.finished() {
+        commands.spawn(create_entity_bundle(&window_query, &asset_server));
     }
 }
 

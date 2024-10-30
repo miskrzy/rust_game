@@ -74,6 +74,7 @@ pub fn hit_target(
     mut commands: Commands,
 ) {
     for (projectile, transform, entity) in projectile_query.iter() {
+        let mut entity_exists = true;
         for (enemy_transform, enemy_entity) in enemy_query.iter() {
             let projectile_collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
@@ -84,9 +85,10 @@ pub fn hit_target(
             if projectile_collider.intersects(&enemy_collider) {
                 commands.entity(entity).despawn();
                 commands.entity(enemy_entity).despawn();
+                entity_exists = false;
             }
         }
-        if projectile.is_finished(transform.translation) {
+        if projectile.is_finished(transform.translation) && entity_exists {
             commands.entity(entity).despawn();
         }
     }
