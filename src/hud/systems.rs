@@ -1,14 +1,21 @@
 use bevy::{
     color::{
-        palettes::tailwind::{GREEN_500, RED_500},
+        palettes::{
+            css::WHITE,
+            tailwind::{GREEN_500, RED_500},
+        },
         Color,
     },
-    prelude::{BuildChildren, Commands, NodeBundle, Query, With, Without},
-    ui::{BackgroundColor, Display, Style, Val},
+    prelude::{BuildChildren, Commands, NodeBundle, Query, Res, TextBundle, With, Without},
+    text::{Text, TextSection, TextStyle},
+    ui::{BackgroundColor, Display, PositionType, Style, Val},
 };
 
-use super::components::{GreenHealthBar, RedHealthBar};
 use super::constants::HEALTH_BAR_LENGTH;
+use super::{
+    components::{GreenHealthBar, RedHealthBar, ScoreNode},
+    resources::Score,
+};
 
 use crate::player::components::{Health, Player};
 
@@ -16,6 +23,7 @@ pub fn spawn(mut commands: Commands) {
     let top_node = NodeBundle {
         style: Style {
             display: Display::Flex,
+            position_type: PositionType::Absolute,
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             top: Val::Percent(0.),
@@ -47,9 +55,33 @@ pub fn spawn(mut commands: Commands) {
         background_color: BackgroundColor(Color::Srgba(RED_500)),
         ..Default::default()
     };
+    let score = TextBundle::from_sections([
+        TextSection::new(
+            "Score: ",
+            TextStyle {
+                color: Color::Srgba(WHITE),
+                ..Default::default()
+            },
+        ),
+        TextSection::new(
+            "0",
+            TextStyle {
+                color: Color::Srgba(WHITE),
+                ..Default::default()
+            },
+        ),
+    ])
+    .with_style(Style {
+        display: Display::Flex,
+        position_type: PositionType::Absolute,
+        top: Val::Px(10.),
+        right: Val::Px(10.),
+        ..Default::default()
+    });
     commands.spawn(top_node).with_children(|parent| {
         parent.spawn((health_bar_green, GreenHealthBar));
         parent.spawn((health_bar_red, RedHealthBar));
+        parent.spawn((score, ScoreNode));
     });
 }
 
@@ -68,4 +100,9 @@ pub fn update_health_bar(
         green_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_green);
         red_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_red);
     }
+}
+
+pub fn update_score(mut score_node: Query<&mut Text, With<ScoreNode>>, score: Res<Score>) {
+    let mut text = score_node.get_single_mut().unwrap();
+    text.sections[1].value = score.score.to_string();
 }

@@ -4,13 +4,13 @@ use bevy::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
     },
-    prelude::{Commands, Entity, Query, Res, Transform, With, Without},
+    prelude::{Commands, Entity, Query, Res, ResMut, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
     time::Time,
 };
 
-use crate::enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER;
 use crate::player::components::{CastTimer, Player};
+use crate::{enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER, hud::resources::Score};
 
 use super::{
     components::Projectile,
@@ -72,6 +72,7 @@ pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
     enemy_query: Query<(&Transform, Entity), With<Enemy>>,
     mut commands: Commands,
+    mut score: ResMut<Score>,
 ) {
     for (projectile, transform, entity) in projectile_query.iter() {
         let mut entity_exists = true;
@@ -86,6 +87,7 @@ pub fn hit_target(
                 commands.entity(entity).despawn();
                 commands.entity(enemy_entity).despawn();
                 entity_exists = false;
+                score.score += 1;
             }
         }
         if projectile.is_finished(transform.translation) && entity_exists {

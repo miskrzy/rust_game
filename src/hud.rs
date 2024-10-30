@@ -3,16 +3,18 @@ use bevy::{app::Startup, prelude::Plugin};
 
 mod components;
 mod constants;
+pub mod resources;
 mod systems;
 
-use systems::spawn;
-use systems::update_health_bar;
+use resources::Score;
+use systems::{spawn, update_health_bar, update_score};
 
 pub struct HUDPlugin;
 
 impl Plugin for HUDPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, spawn)
-            .add_systems(Update, update_health_bar);
+        app.insert_resource(Score { score: 0 })
+            .add_systems(Startup, spawn)
+            .add_systems(Update, (update_health_bar, update_score));
     }
 }
