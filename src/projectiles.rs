@@ -1,4 +1,4 @@
-use systems::{movement, spawn};
+use systems::{hit_target, movement, spawn};
 
 use bevy::prelude::{Plugin, Update};
 
@@ -10,6 +10,6 @@ pub struct ProjectilePlugin;
 
 impl Plugin for ProjectilePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Update, (spawn, movement));
+        app.add_systems(Update, (spawn, movement, hit_target));
     }
 }

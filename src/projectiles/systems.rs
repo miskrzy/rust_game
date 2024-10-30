@@ -1,11 +1,15 @@
 use bevy::{
     asset::AssetServer,
-    math::{Vec2, Vec3},
-    prelude::{Commands, Query, Res, Transform, With, Without},
+    math::{
+        bounding::{BoundingCircle, IntersectsVolume},
+        Vec2, Vec3,
+    },
+    prelude::{Commands, Entity, Query, Res, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
     time::Time,
 };
 
+use crate::enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER;
 use crate::player::components::{CastTimer, Player};
 
 use super::{
@@ -61,5 +65,29 @@ pub fn movement(mut projectile_query: Query<(&Projectile, &mut Transform)>, time
     for (projectile, mut transform) in projectile_query.iter_mut() {
         transform.translation =
             projectile.new_position(transform.translation, time.delta_seconds());
+    }
+}
+
+pub fn hit_target(
+    projectile_query: Query<(&Projectile, &Transform, Entity)>,
+    enemy_query: Query<(&Transform, Entity), With<Enemy>>,
+    mut commands: Commands,
+) {
+    for (projectile, transform, entity) in projectile_query.iter() {
+        for (enemy_transform, enemy_entity) in enemy_query.iter() {
+            let projectile_collider =
+                BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
+            let enemy_collider = BoundingCircle::new(
+                enemy_transform.translation.truncate(),
+                ENEMY_SPRITE_DIAMETER / 2.,
+            );
+            if projectile_collider.intersects(&enemy_collider) {
+                commands.entity(entity).despawn();
+                commands.entity(enemy_entity).despawn();
+            }
+        }
+        if projectile.is_finished(transform.translation) {
+            commands.entity(entity).despawn();
+        }
     }
 }

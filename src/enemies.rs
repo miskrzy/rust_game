@@ -3,7 +3,7 @@ use systems::{attack_player, movement, restrict_movement, spawn};
 use bevy::prelude::{IntoSystemConfigs, Plugin, Startup, Update};
 
 pub mod components;
-mod constants;
+pub mod constants;
 mod systems;
 
 pub struct EnemyPlugin;
