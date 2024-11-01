@@ -6,7 +6,7 @@ use bevy::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
     },
-    prelude::{Commands, Query, Res, ResMut, Transform, With, Without},
+    prelude::{Commands, Entity, Query, Res, ResMut, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
     time::{Time, Timer, TimerMode},
     window::{PrimaryWindow, Window},
@@ -19,8 +19,8 @@ use crate::player::{
 };
 
 use super::constants::{
-    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, SPAWN_AROUND_PLAYER_RADIUS, SPEED, SPRITE_DIAMETER,
-    TEXTURE_PATH,
+    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, INITIAL_HEALTH, SPAWN_AROUND_PLAYER_RADIUS, SPEED,
+    SPRITE_DIAMETER, TEXTURE_PATH,
 };
 use super::{
     components::{AttackTimer, Enemy},
@@ -61,7 +61,7 @@ fn create_entity_bundle(
     window_query: &Query<&Window, With<PrimaryWindow>>,
     asset_server: &Res<AssetServer>,
     player_query: &Query<&Transform, With<Player>>,
-) -> (SpriteBundle, Enemy, AttackTimer) {
+) -> (SpriteBundle, Enemy, AttackTimer, Health) {
     let window = window_query.get_single().unwrap();
     let window_width = window.width();
     let window_height = window.height();
@@ -107,7 +107,12 @@ fn create_entity_bundle(
     timer.tick(Duration::from_secs_f32(1. / ATTACK_SPEED));
     let attack_timer = AttackTimer { timer: timer };
 
-    (sprite_bundle, Enemy, attack_timer)
+    (
+        sprite_bundle,
+        Enemy,
+        attack_timer,
+        Health::new(INITIAL_HEALTH),
+    )
 }
 
 pub fn initial_spawn(
@@ -201,6 +206,14 @@ pub fn attack_player(
                 println!("Player received {DAMAGE} damage");
                 attack_timer.timer.reset();
             }
+        }
+    }
+}
+
+pub fn despawn(enemy_query: Query<(Entity, &Health), With<Enemy>>, mut commands: Commands) {
+    for (entity, health) in enemy_query.iter() {
+        if health.is_dead() {
+            commands.entity(entity).despawn()
         }
     }
 }

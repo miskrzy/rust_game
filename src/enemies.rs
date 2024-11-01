@@ -9,7 +9,9 @@ mod resources;
 mod systems;
 use constants::SPAWN_DELAY;
 use resources::SpawnTimer;
-use systems::{attack_player, initial_spawn, movement, restrict_movement, spawn_over_time};
+use systems::{
+    attack_player, despawn, initial_spawn, movement, restrict_movement, spawn_over_time,
+};
 
 pub struct EnemyPlugin;
 
@@ -20,6 +22,6 @@ impl Plugin for EnemyPlugin {
         })
         .add_systems(Startup, initial_spawn)
         .add_systems(Update, (movement, restrict_movement).chain())
-        .add_systems(Update, (attack_player, spawn_over_time));
+        .add_systems(Update, (attack_player, spawn_over_time, despawn));
     }
 }

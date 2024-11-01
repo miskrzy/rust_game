@@ -1,4 +1,4 @@
-use crate::player::components::{CastTimer, Player};
+use crate::player::components::{CastTimer, Health, Player};
 use crate::{enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER, hud::resources::Score};
 use bevy::{
     asset::AssetServer,
@@ -12,6 +12,7 @@ use bevy::{
 };
 use std::collections::HashSet;
 
+use super::constants::DAMAGE;
 use super::{
     components::Projectile,
     constants::{SPEED, SPRITE_DIAMETER, TEXTURE_PATH},
@@ -70,14 +71,14 @@ pub fn movement(mut projectile_query: Query<(&mut Projectile, &mut Transform)>, 
 
 pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
-    enemy_query: Query<(&Transform, Entity), With<Enemy>>,
+    mut enemy_query: Query<(&Transform, &mut Health), With<Enemy>>,
     mut commands: Commands,
     mut score: ResMut<Score>,
 ) {
     let mut entities_to_despawn = HashSet::new();
     for (projectile, transform, entity) in projectile_query.iter() {
         let mut entity_exists = true;
-        for (enemy_transform, enemy_entity) in enemy_query.iter() {
+        for (enemy_transform, mut health) in enemy_query.iter_mut() {
             let projectile_collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
             let enemy_collider = BoundingCircle::new(
@@ -86,7 +87,7 @@ pub fn hit_target(
             );
             if projectile_collider.intersects(&enemy_collider) {
                 entities_to_despawn.insert(entity);
-                entities_to_despawn.insert(enemy_entity);
+                health.deal_damage(DAMAGE);
                 entity_exists = false;
                 score.score += 1;
             }

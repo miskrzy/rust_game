@@ -6,3 +6,4 @@ pub const INITIAL_AMOUNT: u16 = 4;
 pub const SPAWN_DELAY: f32 = 0.5; // In seconds;
 pub const SPAWN_AROUND_PLAYER_RADIUS: f32 = 200.;
 pub const DAMAGE: f32 = 25.;
+pub const INITIAL_HEALTH: f32 = 100.;
