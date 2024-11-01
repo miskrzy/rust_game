@@ -1,24 +1,37 @@
-use bevy::{math::Vec3, prelude::Component};
+use std::time::Duration;
+
+use bevy::{
+    math::Vec3,
+    prelude::Component,
+    time::{Timer, TimerMode},
+};
+
+use super::constants::DURATION;
 
 #[derive(Component)]
 pub struct Projectile {
-    target: Vec3,
+    direction: Vec3,
     speed: f32,
+    timer: Timer,
 }
 
 impl Projectile {
-    pub fn init_with_target(target: Vec3, speed: f32) -> Self {
+    pub fn new(current: Vec3, target: Vec3, speed: f32) -> Self {
+        let direction = (target - current).normalize_or_zero();
+        let timer = Timer::from_seconds(DURATION, TimerMode::Once);
         Self {
-            target: target,
+            direction: direction,
             speed: speed,
+            timer: timer,
         }
     }
 
-    pub fn new_position(&self, current_position: Vec3, time_delta_in_seconds: f32) -> Vec3 {
-        current_position.move_towards(self.target, self.speed * time_delta_in_seconds)
+    pub fn step(&mut self, time_delta: Duration) -> Vec3 {
+        self.timer.tick(time_delta);
+        self.direction * self.speed * time_delta.as_secs_f32()
     }
 
-    pub fn is_finished(&self, current_position: Vec3) -> bool {
-        current_position == self.target
+    pub fn is_finished(&self) -> bool {
+        self.timer.finished()
     }
 }

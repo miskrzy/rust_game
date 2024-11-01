@@ -40,7 +40,8 @@ pub fn spawn(
             }
 
             if let Some(enemy_translation) = closest_enemy.0 {
-                let projectile = Projectile::init_with_target(enemy_translation, SPEED);
+                let projectile =
+                    Projectile::new(player_transform.translation, enemy_translation, SPEED);
 
                 let sprite = Sprite {
                     custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
@@ -61,10 +62,9 @@ pub fn spawn(
     }
 }
 
-pub fn movement(mut projectile_query: Query<(&Projectile, &mut Transform)>, time: Res<Time>) {
-    for (projectile, mut transform) in projectile_query.iter_mut() {
-        transform.translation =
-            projectile.new_position(transform.translation, time.delta_seconds());
+pub fn movement(mut projectile_query: Query<(&mut Projectile, &mut Transform)>, time: Res<Time>) {
+    for (mut projectile, mut transform) in projectile_query.iter_mut() {
+        transform.translation += projectile.step(time.delta());
     }
 }
 
@@ -91,7 +91,7 @@ pub fn hit_target(
                 score.score += 1;
             }
         }
-        if projectile.is_finished(transform.translation) && entity_exists {
+        if projectile.is_finished() && entity_exists {
             entities_to_despawn.insert(entity);
         }
     }
