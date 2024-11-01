@@ -111,7 +111,7 @@ fn create_entity_bundle(
         sprite_bundle,
         Enemy,
         attack_timer,
-        Health::new(INITIAL_HEALTH),
+        Health::new(INITIAL_HEALTH, 0.),
     )
 }
 

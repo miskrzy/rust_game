@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::Component;
 use bevy::time::Timer;
 
@@ -8,13 +10,15 @@ pub struct Player;
 pub struct Health {
     health: f32,
     max_health: f32,
+    regen: f32,
 }
 
 impl Health {
-    pub fn new(health: f32) -> Self {
+    pub fn new(health: f32, regen: f32) -> Self {
         Self {
             health: health,
             max_health: health,
+            regen: regen,
         }
     }
 
@@ -28,6 +32,12 @@ impl Health {
 
     pub fn deal_damage(&mut self, damage: f32) {
         self.health -= damage;
+    }
+
+    pub fn tick_regen(&mut self, time_delta: Duration) {
+        if self.health < self.max_health {
+            self.health += self.regen * time_delta.as_secs_f32();
+        }
     }
 
     pub fn is_dead(&self) -> bool {

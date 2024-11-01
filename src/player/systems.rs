@@ -10,8 +10,11 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-use super::components::{CastTimer, Health, Player};
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::{
+    components::{CastTimer, Health, Player},
+    constants::HEALTH_REGEN,
+};
 use crate::projectiles::constants::CAST_SPEED;
 
 pub fn spawn(
@@ -37,7 +40,7 @@ pub fn spawn(
         ..Default::default()
     };
 
-    let health = Health::new(INITIAL_HEALTH);
+    let health = Health::new(INITIAL_HEALTH, HEALTH_REGEN);
 
     let projectile_cast_timer = CastTimer {
         timer: Timer::new(Duration::from_secs_f32(1. / CAST_SPEED), TimerMode::Once),
@@ -101,5 +104,11 @@ pub fn despawn(player_query: Query<(Entity, &Health), With<Player>>, mut command
             commands.entity(entity).despawn();
             println!("Player is dead");
         }
+    }
+}
+
+pub fn regen(mut player_query: Query<&mut Health, With<Player>>, time: Res<Time>) {
+    if let Ok(mut health) = player_query.get_single_mut() {
+        health.tick_regen(time.delta());
     }
 }
