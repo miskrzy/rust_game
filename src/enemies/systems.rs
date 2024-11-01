@@ -19,21 +19,74 @@ use crate::player::{
 };
 
 use super::constants::{
-    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, SPEED, SPRITE_DIAMETER, TEXTURE_PATH,
+    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, SPAWN_AROUND_PLAYER_RADIUS, SPEED, SPRITE_DIAMETER,
+    TEXTURE_PATH,
 };
 use super::{
     components::{AttackTimer, Enemy},
     resources::SpawnTimer,
 };
 
+fn create_random_position(
+    screen_l: f32,
+    screen_r: f32,
+    screen_d: f32,
+    screen_u: f32,
+    player_x: f32,
+    player_y: f32,
+    player_r: f32,
+    enemy_r: f32,
+) -> (f32, f32) {
+    if (screen_u - screen_d) <= (player_r + 2. * enemy_r) * 2. {
+        panic!("spawn radius is too large for the height of the screen");
+    }
+    let mut rng_gen = thread_rng();
+    let x = rng_gen.gen_range((screen_l + enemy_r)..(screen_r - enemy_r));
+    if x < player_x + player_r + enemy_r && x > player_x - player_r - enemy_r {
+        let offset = ((player_r + enemy_r).powi(2) - (x - player_x).powi(2)).sqrt();
+        let mut y = rng_gen.gen_range((screen_d + enemy_r)..(screen_u - enemy_r - 2.0 * offset));
+        y = if y > player_y - offset {
+            y + 2. * offset
+        } else {
+            y
+        };
+        (x, y)
+    } else {
+        let y = rng_gen.gen_range(screen_d..screen_u);
+        (x, y)
+    }
+}
+
 fn create_entity_bundle(
     window_query: &Query<&Window, With<PrimaryWindow>>,
     asset_server: &Res<AssetServer>,
+    player_query: &Query<&Transform, With<Player>>,
 ) -> (SpriteBundle, Enemy, AttackTimer) {
-    let mut rng_gen = thread_rng();
     let window = window_query.get_single().unwrap();
-    let x_position = rng_gen.gen_range(0.0..window.width());
-    let y_position = rng_gen.gen_range(0.0..window.height());
+    let window_width = window.width();
+    let window_height = window.height();
+
+    let (player_x, player_y) = if let Ok(player_transform) = player_query.get_single() {
+        (
+            player_transform.translation.x,
+            player_transform.translation.y,
+        )
+    } else {
+        (window_width / 2., window_height / 2.)
+    };
+
+    let enemy_radius = SPRITE_DIAMETER / 2.;
+
+    let (x_position, y_position) = create_random_position(
+        enemy_radius,
+        window_width - enemy_radius,
+        enemy_radius,
+        window_height - enemy_radius,
+        player_x,
+        player_y,
+        SPAWN_AROUND_PLAYER_RADIUS,
+        SPRITE_DIAMETER / 2.,
+    );
     let z_position: f32 = 0.0;
 
     let texture = asset_server.load(TEXTURE_PATH);
@@ -61,9 +114,14 @@ pub fn initial_spawn(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
+    player_query: Query<&Transform, With<Player>>,
 ) {
     for _ in 0..INITIAL_AMOUNT {
-        commands.spawn(create_entity_bundle(&window_query, &asset_server));
+        commands.spawn(create_entity_bundle(
+            &window_query,
+            &asset_server,
+            &player_query,
+        ));
     }
 }
 
@@ -73,10 +131,15 @@ pub fn spawn_over_time(
     asset_server: Res<AssetServer>,
     mut spawn_timer: ResMut<SpawnTimer>,
     time: Res<Time>,
+    player_query: Query<&Transform, With<Player>>,
 ) {
     spawn_timer.timer.tick(time.delta());
     if spawn_timer.timer.finished() {
-        commands.spawn(create_entity_bundle(&window_query, &asset_server));
+        commands.spawn(create_entity_bundle(
+            &window_query,
+            &asset_server,
+            &player_query,
+        ));
     }
 }
 

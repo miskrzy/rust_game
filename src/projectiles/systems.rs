@@ -1,3 +1,5 @@
+use crate::player::components::{CastTimer, Player};
+use crate::{enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER, hud::resources::Score};
 use bevy::{
     asset::AssetServer,
     math::{
@@ -8,9 +10,7 @@ use bevy::{
     sprite::{Sprite, SpriteBundle},
     time::Time,
 };
-
-use crate::player::components::{CastTimer, Player};
-use crate::{enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER, hud::resources::Score};
+use std::collections::HashSet;
 
 use super::{
     components::Projectile,
@@ -74,6 +74,7 @@ pub fn hit_target(
     mut commands: Commands,
     mut score: ResMut<Score>,
 ) {
+    let mut entities_to_despawn = HashSet::new();
     for (projectile, transform, entity) in projectile_query.iter() {
         let mut entity_exists = true;
         for (enemy_transform, enemy_entity) in enemy_query.iter() {
@@ -84,14 +85,17 @@ pub fn hit_target(
                 ENEMY_SPRITE_DIAMETER / 2.,
             );
             if projectile_collider.intersects(&enemy_collider) {
-                commands.entity(entity).despawn();
-                commands.entity(enemy_entity).despawn();
+                entities_to_despawn.insert(entity);
+                entities_to_despawn.insert(enemy_entity);
                 entity_exists = false;
                 score.score += 1;
             }
         }
         if projectile.is_finished(transform.translation) && entity_exists {
-            commands.entity(entity).despawn();
+            entities_to_despawn.insert(entity);
         }
+    }
+    for entity in entities_to_despawn {
+        commands.entity(entity).despawn();
     }
 }
