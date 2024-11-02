@@ -96,12 +96,18 @@ pub fn restrict_movement(
     }
 }
 
-pub fn despawn(player_query: Query<(Entity, &Health), With<Player>>, mut commands: Commands) {
+pub fn despawn_dead(player_query: Query<(Entity, &Health), With<Player>>, mut commands: Commands) {
     if let Ok((entity, health)) = player_query.get_single() {
         if health.is_dead() {
             commands.entity(entity).despawn();
             println!("Player is dead");
         }
+    }
+}
+
+pub fn despawn(player_query: Query<Entity, With<Player>>, mut commands: Commands) {
+    if let Ok(entity) = player_query.get_single() {
+        commands.entity(entity).despawn();
     }
 }
 

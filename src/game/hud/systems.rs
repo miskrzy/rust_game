@@ -1,9 +1,10 @@
 use super::super::player::components::{Health, Player};
 use super::{
-    components::{GreenHealthBar, RedHealthBar, ScoreNode},
+    components::{GreenHealthBar, HUDNode, RedHealthBar, ScoreNode},
     constants::HEALTH_BAR_LENGTH,
     resources::Score,
 };
+use bevy::prelude::{DespawnRecursiveExt, Entity};
 use bevy::{
     color::{
         palettes::{
@@ -76,7 +77,7 @@ pub fn spawn(mut commands: Commands) {
         right: Val::Px(10.),
         ..Default::default()
     });
-    commands.spawn(top_node).with_children(|parent| {
+    commands.spawn((top_node, HUDNode)).with_children(|parent| {
         parent.spawn((health_bar_green, GreenHealthBar));
         parent.spawn((health_bar_red, RedHealthBar));
         parent.spawn((score, ScoreNode));
@@ -93,14 +94,24 @@ pub fn update_health_bar(
         let max = player_health.max();
         let fraction_green = current / max;
         let fraction_red = (max - current) / max;
-        let mut green_bar = green_health_bar_query.get_single_mut().unwrap();
-        let mut red_bar = red_health_bar_query.get_single_mut().unwrap();
-        green_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_green);
-        red_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_red);
+        if let (Ok(mut green_bar), Ok(mut red_bar)) = (
+            green_health_bar_query.get_single_mut(),
+            red_health_bar_query.get_single_mut(),
+        ) {
+            green_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_green);
+            red_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_red);
+        }
     }
 }
 
 pub fn update_score(mut score_node: Query<&mut Text, With<ScoreNode>>, score: Res<Score>) {
-    let mut text = score_node.get_single_mut().unwrap();
-    text.sections[1].value = score.score.to_string();
+    if let Ok(mut text) = score_node.get_single_mut() {
+        text.sections[1].value = score.score.to_string();
+    }
+}
+
+pub fn despawn(hud_query: Query<Entity, With<HUDNode>>, mut commands: Commands) {
+    if let Ok(entity) = hud_query.get_single() {
+        commands.entity(entity).despawn_recursive();
+    }
 }

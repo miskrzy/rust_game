@@ -1,9 +1,21 @@
-use bevy::prelude::{App, DefaultPlugins};
+use bevy::{
+    app::Update,
+    prelude::{App, AppExtStates, DefaultPlugins},
+};
 
 mod game;
+mod main_menu;
+mod states;
+mod systems;
 
 use game::GamePlugin;
+use states::AppState;
+use systems::change_app_state;
 
 fn main() {
-    App::new().add_plugins((DefaultPlugins, GamePlugin)).run();
+    App::new()
+        .add_plugins((DefaultPlugins, GamePlugin))
+        .insert_state(AppState::MainMenu)
+        .add_systems(Update, change_app_state)
+        .run();
 }

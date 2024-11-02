@@ -207,10 +207,16 @@ pub fn attack_player(
     }
 }
 
-pub fn despawn(enemy_query: Query<(Entity, &Health), With<Enemy>>, mut commands: Commands) {
+pub fn despawn_dead(enemy_query: Query<(Entity, &Health), With<Enemy>>, mut commands: Commands) {
     for (entity, health) in enemy_query.iter() {
         if health.is_dead() {
             commands.entity(entity).despawn()
         }
+    }
+}
+
+pub fn despawn(enemy_query: Query<Entity, With<Enemy>>, mut commands: Commands) {
+    for entity in enemy_query.iter() {
+        commands.entity(entity).despawn();
     }
 }

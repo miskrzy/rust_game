@@ -100,3 +100,9 @@ pub fn hit_target(
         commands.entity(entity).despawn();
     }
 }
+
+pub fn despawn(projectile_query: Query<Entity, With<Projectile>>, mut commands: Commands) {
+    for entity in projectile_query.iter() {
+        commands.entity(entity).despawn();
+    }
+}
