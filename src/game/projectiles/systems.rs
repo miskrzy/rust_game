@@ -1,5 +1,13 @@
-use crate::player::components::{CastTimer, Health, Player};
-use crate::{enemies::constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER, hud::resources::Score};
+use super::super::{
+    enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
+    hud::resources::Score,
+    player::components::{CastTimer, Health, Player},
+};
+use super::constants::DAMAGE;
+use super::{
+    components::Projectile,
+    constants::{SPEED, SPRITE_DIAMETER, TEXTURE_PATH},
+};
 use bevy::{
     asset::AssetServer,
     math::{
@@ -11,14 +19,6 @@ use bevy::{
     time::Time,
 };
 use std::collections::HashSet;
-
-use super::constants::DAMAGE;
-use super::{
-    components::Projectile,
-    constants::{SPEED, SPRITE_DIAMETER, TEXTURE_PATH},
-};
-
-use crate::enemies::components::Enemy;
 
 pub fn spawn(
     mut player_query: Query<(&mut CastTimer, &Transform), With<Player>>,

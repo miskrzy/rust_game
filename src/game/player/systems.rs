@@ -1,5 +1,9 @@
-use std::time::Duration;
-
+use super::super::projectiles::constants::CAST_SPEED;
+use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::{
+    components::{CastTimer, Health, Player},
+    constants::HEALTH_REGEN,
+};
 use bevy::{
     asset::AssetServer,
     input::ButtonInput,
@@ -9,13 +13,7 @@ use bevy::{
     time::{Time, Timer, TimerMode},
     window::PrimaryWindow,
 };
-
-use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
-use super::{
-    components::{CastTimer, Health, Player},
-    constants::HEALTH_REGEN,
-};
-use crate::projectiles::constants::CAST_SPEED;
+use std::time::Duration;
 
 pub fn spawn(
     mut commands: Commands,

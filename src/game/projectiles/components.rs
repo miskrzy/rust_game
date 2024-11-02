@@ -1,12 +1,10 @@
-use std::time::Duration;
-
+use super::constants::DURATION;
 use bevy::{
     math::Vec3,
     prelude::Component,
     time::{Timer, TimerMode},
 };
-
-use super::constants::DURATION;
+use std::time::Duration;
 
 #[derive(Component)]
 pub struct Projectile {

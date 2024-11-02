@@ -1,3 +1,9 @@
+use super::super::player::components::{Health, Player};
+use super::{
+    components::{GreenHealthBar, RedHealthBar, ScoreNode},
+    constants::HEALTH_BAR_LENGTH,
+    resources::Score,
+};
 use bevy::{
     color::{
         palettes::{
@@ -10,14 +16,6 @@ use bevy::{
     text::{Text, TextSection, TextStyle},
     ui::{BackgroundColor, Display, PositionType, Style, Val},
 };
-
-use super::constants::HEALTH_BAR_LENGTH;
-use super::{
-    components::{GreenHealthBar, RedHealthBar, ScoreNode},
-    resources::Score,
-};
-
-use crate::player::components::{Health, Player};
 
 pub fn spawn(mut commands: Commands) {
     let top_node = NodeBundle {

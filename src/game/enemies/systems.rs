@@ -1,5 +1,15 @@
-use std::time::Duration;
-
+use super::super::player::{
+    components::{Health, Player},
+    constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
+};
+use super::{
+    components::{AttackTimer, Enemy},
+    constants::{
+        ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, INITIAL_HEALTH, SPAWN_AROUND_PLAYER_RADIUS, SPEED,
+        SPRITE_DIAMETER, TEXTURE_PATH,
+    },
+    resources::SpawnTimer,
+};
 use bevy::{
     asset::AssetServer,
     math::{
@@ -12,20 +22,7 @@ use bevy::{
     window::{PrimaryWindow, Window},
 };
 use rand::{thread_rng, Rng};
-
-use crate::player::{
-    components::{Health, Player},
-    constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
-};
-
-use super::constants::{
-    ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, INITIAL_HEALTH, SPAWN_AROUND_PLAYER_RADIUS, SPEED,
-    SPRITE_DIAMETER, TEXTURE_PATH,
-};
-use super::{
-    components::{AttackTimer, Enemy},
-    resources::SpawnTimer,
-};
+use std::time::Duration;
 
 fn create_random_position(
     screen_l: f32,

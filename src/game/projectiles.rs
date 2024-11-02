@@ -1,10 +1,10 @@
-use systems::{hit_target, movement, spawn};
-
 use bevy::prelude::{Plugin, Update};
 
 mod components;
 pub mod constants;
 mod systems;
+
+use systems::{hit_target, movement, spawn};
 
 pub struct ProjectilePlugin;
 

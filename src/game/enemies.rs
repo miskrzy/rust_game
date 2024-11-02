@@ -7,6 +7,7 @@ pub mod components;
 pub mod constants;
 mod resources;
 mod systems;
+
 use constants::SPAWN_DELAY;
 use resources::SpawnTimer;
 use systems::{

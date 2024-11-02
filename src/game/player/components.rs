@@ -1,7 +1,6 @@
-use std::time::Duration;
-
 use bevy::prelude::Component;
 use bevy::time::Timer;
+use std::time::Duration;
 
 #[derive(Component)]
 pub struct Player;
