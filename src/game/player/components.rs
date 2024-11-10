@@ -52,3 +52,8 @@ impl Health {
 pub struct CastTimer {
     pub timer: Timer,
 }
+
+#[derive(Component)]
+pub struct Score {
+    pub score: u16,
+}

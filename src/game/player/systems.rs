@@ -1,4 +1,5 @@
 use super::super::projectiles::constants::CAST_SPEED;
+use super::components::Score;
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
 use super::{
     components::{CastTimer, Health, Player},
@@ -44,7 +45,9 @@ pub fn spawn(
         timer: Timer::new(Duration::from_secs_f32(1. / CAST_SPEED), TimerMode::Once),
     };
 
-    commands.spawn((sprite_bundle, Player, health, projectile_cast_timer));
+    let score = Score { score: 0 };
+
+    commands.spawn((sprite_bundle, Player, health, projectile_cast_timer, score));
 }
 
 pub fn movement(

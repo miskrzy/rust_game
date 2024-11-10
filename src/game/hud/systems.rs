@@ -1,8 +1,9 @@
+use crate::game::player::components::Score;
+
 use super::super::player::components::{Health, Player};
 use super::{
     components::{GreenHealthBar, HUDNode, RedHealthBar, ScoreNode},
     constants::HEALTH_BAR_LENGTH,
-    resources::Score,
 };
 use bevy::prelude::{DespawnRecursiveExt, Entity};
 use bevy::{
@@ -13,7 +14,7 @@ use bevy::{
         },
         Color,
     },
-    prelude::{BuildChildren, Commands, NodeBundle, Query, Res, TextBundle, With, Without},
+    prelude::{BuildChildren, Commands, NodeBundle, Query, TextBundle, With, Without},
     text::{Text, TextSection, TextStyle},
     ui::{BackgroundColor, Display, PositionType, Style, Val},
 };
@@ -104,8 +105,11 @@ pub fn update_health_bar(
     }
 }
 
-pub fn update_score(mut score_node: Query<&mut Text, With<ScoreNode>>, score: Res<Score>) {
-    if let Ok(mut text) = score_node.get_single_mut() {
+pub fn update_score(
+    mut score_node: Query<&mut Text, With<ScoreNode>>,
+    player_query: Query<&Score, With<Player>>,
+) {
+    if let (Ok(mut text), Ok(score)) = (score_node.get_single_mut(), player_query.get_single()) {
         text.sections[1].value = score.score.to_string();
     }
 }

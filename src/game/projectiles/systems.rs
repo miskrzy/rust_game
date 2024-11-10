@@ -1,6 +1,7 @@
+use crate::game::player::components::Score;
+
 use super::super::{
     enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
-    hud::resources::Score,
     player::components::{CastTimer, Health, Player},
 };
 use super::constants::DAMAGE;
@@ -14,7 +15,7 @@ use bevy::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
     },
-    prelude::{Commands, Entity, Query, Res, ResMut, Transform, With, Without},
+    prelude::{Commands, Entity, Query, Res, Transform, With, Without},
     sprite::{Sprite, SpriteBundle},
     time::Time,
 };
@@ -73,7 +74,7 @@ pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
     mut enemy_query: Query<(&Transform, &mut Health), With<Enemy>>,
     mut commands: Commands,
-    mut score: ResMut<Score>,
+    mut player_query: Query<&mut Score, With<Player>>,
 ) {
     let mut entities_to_despawn = HashSet::new();
     for (projectile, transform, entity) in projectile_query.iter() {
@@ -89,7 +90,9 @@ pub fn hit_target(
                 entities_to_despawn.insert(entity);
                 health.deal_damage(DAMAGE);
                 entity_exists = false;
-                score.score += 1;
+                if let Ok(mut score) = player_query.get_single_mut() {
+                    score.score += 1;
+                }
             }
         }
         if projectile.is_finished() && entity_exists {
