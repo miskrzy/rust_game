@@ -1,5 +1,5 @@
 use bevy::{
-    prelude::{in_state, IntoSystemConfigs, OnEnter, OnExit, Plugin, Update},
+    prelude::{in_state, App, Condition, IntoSystemConfigs, OnEnter, OnExit, Plugin, Update},
     time::{Timer, TimerMode},
 };
 
@@ -17,10 +17,12 @@ use systems::{
 
 use crate::states::AppState;
 
+use super::states::GameState;
+
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
-    fn build(&self, app: &mut bevy::prelude::App) {
+    fn build(&self, app: &mut App) {
         app.insert_resource(SpawnTimer {
             timer: Timer::from_seconds(SPAWN_DELAY, TimerMode::Repeating),
         })
@@ -31,7 +33,7 @@ impl Plugin for EnemyPlugin {
                 (movement, restrict_movement).chain(),
                 (attack_player, spawn_over_time, despawn_dead),
             )
-                .run_if(in_state(AppState::Game)),
+                .run_if(in_state(AppState::Game).and_then(in_state(GameState::Play))),
         )
         .add_systems(OnExit(AppState::Game), despawn);
     }

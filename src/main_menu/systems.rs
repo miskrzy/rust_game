@@ -7,7 +7,7 @@ use bevy::{
         BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, NextState,
         NodeBundle, Query, ResMut, TextBundle, With,
     },
-    text::TextStyle,
+    text::{Text, TextStyle},
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, Interaction,
         JustifyContent, PositionType, Style, UiRect, Val,
@@ -28,6 +28,7 @@ pub fn spawn(mut commands: Commands) {
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
+            row_gap: Val::Percent(5.),
             ..Default::default()
         },
         background_color: BackgroundColor(Color::Srgba(GRAY)),
@@ -46,13 +47,20 @@ pub fn spawn(mut commands: Commands) {
         border_radius: BorderRadius::all(Val::Percent(50.)),
         ..Default::default()
     };
-    let start_text = TextBundle::from_section(
-        " \n  Start Game  \n ",
-        TextStyle {
-            color: Color::Srgba(WHITE),
+    let start_text = TextBundle {
+        text: Text::from_section(
+            "Start Game",
+            TextStyle {
+                color: Color::Srgba(WHITE),
+                ..Default::default()
+            },
+        ),
+        style: Style {
+            margin: UiRect::all(Val::Px(10.)),
             ..Default::default()
         },
-    );
+        ..Default::default()
+    };
     commands
         .spawn((screen_node, MainMenu))
         .with_children(|parent| {

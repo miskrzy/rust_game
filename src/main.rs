@@ -3,7 +3,7 @@ use bevy::{
     prelude::{App, AppExtStates, DefaultPlugins},
 };
 
-mod game;
+pub mod game;
 mod main_menu;
 mod states;
 mod systems;
