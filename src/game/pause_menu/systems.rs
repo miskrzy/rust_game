@@ -18,7 +18,7 @@ use bevy::{
 use crate::{game::states::GameState, states::AppState};
 
 use super::{
-    components::{PauseMenu, QuitButton, ResumeButton},
+    components::{MenuButton, PauseMenu, ResumeButton},
     constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR},
 };
 
@@ -66,7 +66,7 @@ pub fn spawn(mut commands: Commands) {
         },
         ..Default::default()
     };
-    let quit_button_node = ButtonBundle {
+    let menu_button_node = ButtonBundle {
         style: Style {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
@@ -80,9 +80,9 @@ pub fn spawn(mut commands: Commands) {
         border_radius: BorderRadius::all(Val::Percent(50.)),
         ..Default::default()
     };
-    let quit_text = TextBundle {
+    let menu_text = TextBundle {
         text: Text::from_section(
-            "Quit",
+            "Main menu",
             TextStyle {
                 color: Color::Srgba(WHITE),
                 ..Default::default()
@@ -99,13 +99,13 @@ pub fn spawn(mut commands: Commands) {
         .with_children(|parent| {
             parent
                 .spawn((resume_button_node, ResumeButton))
-                .with_children(|parent| {
+                .with_children(|parent: &mut bevy::prelude::ChildBuilder<'_>| {
                     parent.spawn(resume_text);
                 });
             parent
-                .spawn((quit_button_node, QuitButton))
+                .spawn((menu_button_node, MenuButton))
                 .with_children(|parent| {
-                    parent.spawn(quit_text);
+                    parent.spawn(menu_text);
                 });
         });
 }
@@ -121,7 +121,7 @@ pub fn change_game_state(
     game_state: ResMut<State<GameState>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::KeyP) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
         match *game_state.get() {
             GameState::Play => {
                 next_game_state.set(GameState::Pause);
@@ -155,10 +155,10 @@ pub fn resume_button_interaction(
     }
 }
 
-pub fn quit_button_interaction(
+pub fn menu_button_interaction(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (With<QuitButton>, Changed<Interaction>),
+        (With<MenuButton>, Changed<Interaction>),
     >,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut next_app_state: ResMut<NextState<AppState>>,

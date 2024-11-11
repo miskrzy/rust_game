@@ -1,5 +1,5 @@
 use bevy::{
-    app::{Startup, Update},
+    app::Startup,
     prelude::{App, AppExtStates, Plugin},
 };
 
@@ -13,7 +13,7 @@ pub mod states;
 
 use enemies::EnemyPlugin;
 use hud::HUDPlugin;
-use others::{exit_game, spawn_camera};
+use others::spawn_camera;
 use pause_menu::PauseMenuPlugin;
 use player::PlayerPlugin;
 use projectiles::ProjectilePlugin;
@@ -31,7 +31,6 @@ impl Plugin for GamePlugin {
             PauseMenuPlugin,
         ))
         .insert_state(GameState::Play)
-        .add_systems(Startup, spawn_camera)
-        .add_systems(Update, exit_game);
+        .add_systems(Startup, spawn_camera);
     }
 }

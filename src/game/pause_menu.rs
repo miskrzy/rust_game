@@ -8,7 +8,7 @@ mod constants;
 mod systems;
 
 use systems::{
-    change_game_state, despawn, quit_button_interaction, resume_button_interaction, spawn,
+    change_game_state, despawn, menu_button_interaction, resume_button_interaction, spawn,
 };
 
 use crate::states::AppState;
@@ -24,7 +24,7 @@ impl Plugin for PauseMenuPlugin {
             .add_systems(Update, change_game_state.run_if(in_state(AppState::Game)))
             .add_systems(
                 Update,
-                (quit_button_interaction, resume_button_interaction)
+                (menu_button_interaction, resume_button_interaction)
                     .run_if(in_state(GameState::Pause)),
             );
     }

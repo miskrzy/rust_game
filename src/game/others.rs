@@ -1,9 +1,5 @@
 use bevy::{
-    app::AppExit,
-    prelude::{
-        ButtonInput, Camera2dBundle, Commands, EventWriter, KeyCode, Query, Res, Transform, Window,
-        With,
-    },
+    prelude::{Camera2dBundle, Commands, Query, Transform, Window, With},
     window::PrimaryWindow,
 };
 
@@ -19,10 +15,4 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     };
 
     commands.spawn(camera_bundle);
-}
-
-pub fn exit_game(keyboard_input: Res<ButtonInput<KeyCode>>, mut exit: EventWriter<AppExit>) {
-    if keyboard_input.pressed(KeyCode::Escape) {
-        exit.send(AppExit::Success);
-    }
 }

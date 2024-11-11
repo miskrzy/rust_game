@@ -9,7 +9,7 @@ mod components;
 mod constants;
 mod systems;
 
-use systems::{despawn, spawn, start_button_interaction};
+use systems::{despawn, esc_quit_game, quit_button_interaction, spawn, start_button_interaction};
 
 pub struct MainMenuPlugin;
 
@@ -19,7 +19,12 @@ impl Plugin for MainMenuPlugin {
             .add_systems(OnExit(AppState::MainMenu), despawn)
             .add_systems(
                 Update,
-                start_button_interaction.run_if(in_state(AppState::MainMenu)),
+                (
+                    start_button_interaction,
+                    quit_button_interaction,
+                    esc_quit_game,
+                )
+                    .run_if(in_state(AppState::MainMenu)),
             );
     }
 }

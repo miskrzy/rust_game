@@ -3,5 +3,5 @@ use bevy::color::{
     Color,
 };
 
-pub const START_BUTTON_COLOR: Color = Color::Srgba(GRAY_700);
-pub const START_BUTTON_HOVERED_COLOR: Color = Color::Srgba(GRAY_500);
+pub const BUTTON_COLOR: Color = Color::Srgba(GRAY_700);
+pub const BUTTON_HOVERED_COLOR: Color = Color::Srgba(GRAY_500);
