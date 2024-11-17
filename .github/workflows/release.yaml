@@ -23,14 +23,14 @@ jobs:
         # args: --release
 
     - name: Create ZIP
+      shell: pwsh
       run: |
-        powershell -Command "
-          $exeFile = './target/debug/game.exe'
-          $assetsDirectory = './assets'
-          $zipFile = './target/debug/my_release.zip'
-
-          Compress-Archive -Path $exeFile, $assetsDirectory -DestinationPath $zipFile
-        "
+        $compress = @{
+          Path = "./target/debug/game.exe", "./assets"
+          CompressionLevel = "Fastest"
+          DestinationPath = "./target/debug/my_release.zip"
+        }
+        Compress-Archive @compress
 
     - name: Get version
       id: get_version
