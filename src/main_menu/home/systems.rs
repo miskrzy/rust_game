@@ -1,19 +1,25 @@
+use super::super::states::MainMenuState;
+use super::components::{ControlsButton, MainMenu, QuitButton, StartButton};
+use super::constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR};
+use crate::game::states::GameState;
+use crate::states::AppState;
 use bevy::{
-    app::AppExit, color::{
+    app::AppExit,
+    color::{
         palettes::css::{BLACK, GRAY, WHITE},
         Color,
-    }, input::ButtonInput, prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter, KeyCode, NextState, NodeBundle, Query, Res, ResMut, TextBundle, With
-    }, text::{Text, TextStyle}, ui::{
+    },
+    input::ButtonInput,
+    prelude::{
+        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter,
+        KeyCode, NextState, NodeBundle, Query, Res, ResMut, TextBundle, With,
+    },
+    text::{Text, TextStyle},
+    ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
         Interaction, JustifyContent, PositionType, Style, UiRect, Val,
-    }
+    },
 };
-
-use crate::states::AppState;
-
-use super::components::{MainMenu, QuitButton, StartButton};
-use super::constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR};
 
 pub fn spawn(mut commands: Commands) {
     let screen_node = NodeBundle {
@@ -85,6 +91,34 @@ pub fn spawn(mut commands: Commands) {
         },
         ..Default::default()
     };
+    let controls_button_node = ButtonBundle {
+        style: Style {
+            display: Display::Flex,
+            border: UiRect::all(Val::Px(2.)),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::vertical(Val::Px(10.)),
+            ..Default::default()
+        },
+        background_color: BackgroundColor(BUTTON_COLOR),
+        border_color: BorderColor(Color::Srgba(BLACK)),
+        border_radius: BorderRadius::all(Val::Percent(50.)),
+        ..Default::default()
+    };
+    let controls_text = TextBundle {
+        text: Text::from_section(
+            "Controls",
+            TextStyle {
+                color: Color::Srgba(WHITE),
+                ..Default::default()
+            },
+        ),
+        style: Style {
+            margin: UiRect::all(Val::Px(10.)),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
     commands
         .spawn((screen_node, MainMenu))
         .with_children(|parent| {
@@ -97,6 +131,11 @@ pub fn spawn(mut commands: Commands) {
                 .spawn((quit_button_node, QuitButton))
                 .with_children(|parent| {
                     parent.spawn(quit_text);
+                });
+            parent
+                .spawn((controls_button_node, ControlsButton))
+                .with_children(|parent| {
+                    parent.spawn(controls_text);
                 });
         });
 }
@@ -112,12 +151,16 @@ pub fn start_button_interaction(
         (&Interaction, &mut BackgroundColor),
         (With<StartButton>, Changed<Interaction>),
     >,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut next_app_state: ResMut<NextState<AppState>>,
+    mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
 ) {
     if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_app_state.set(AppState::Game);
+                next_game_state.set(GameState::Play);
+                next_main_menu_state.set(MainMenuState::Disabled)
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;
@@ -140,6 +183,28 @@ pub fn quit_button_interaction(
         match *interaction {
             Interaction::Pressed => {
                 exit.send(AppExit::Success);
+            }
+            Interaction::Hovered => {
+                background_color.0 = BUTTON_HOVERED_COLOR;
+            }
+            Interaction::None => {
+                background_color.0 = BUTTON_COLOR;
+            }
+        }
+    }
+}
+
+pub fn controls_button_interaction(
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<ControlsButton>, Changed<Interaction>),
+    >,
+    mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
+) {
+    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                next_main_menu_state.set(MainMenuState::Controls);
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;

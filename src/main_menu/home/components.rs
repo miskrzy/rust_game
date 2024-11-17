@@ -8,3 +8,6 @@ pub struct StartButton;
 
 #[derive(Component)]
 pub struct QuitButton;
+
+#[derive(Component)]
+pub struct ControlsButton;

@@ -30,7 +30,7 @@ impl Plugin for GamePlugin {
             ProjectilePlugin,
             PauseMenuPlugin,
         ))
-        .insert_state(GameState::Play)
+        .insert_state(GameState::Over)
         .add_systems(Startup, spawn_camera);
     }
 }

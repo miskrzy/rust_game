@@ -15,12 +15,13 @@ use bevy::{
     },
 };
 
-use crate::{game::states::GameState, states::AppState};
-
+use super::super::states::GameState;
 use super::{
     components::{MenuButton, PauseMenu, ResumeButton},
     constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR},
 };
+use crate::main_menu::states::MainMenuState;
+use crate::states::AppState;
 
 pub fn spawn(mut commands: Commands) {
     let screen_node = NodeBundle {
@@ -32,7 +33,6 @@ pub fn spawn(mut commands: Commands) {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-
             ..Default::default()
         },
         background_color: BackgroundColor(Color::Srgba(GRAY).with_alpha(0.5)),
@@ -116,19 +116,18 @@ pub fn despawn(mut commands: Commands, pause_menu_query: Query<Entity, With<Paus
     }
 }
 
-pub fn change_game_state(
+pub fn pause_unpause_game(
     mut next_game_state: ResMut<NextState<GameState>>,
-    game_state: ResMut<State<GameState>>,
+    game_state: Res<State<GameState>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        match *game_state.get() {
+        match game_state.get() {
             GameState::Play => {
                 next_game_state.set(GameState::Pause);
             }
-            GameState::Pause => {
-                next_game_state.set(GameState::Play);
-            }
+            GameState::Pause => next_game_state.set(GameState::Play),
+            _ => (),
         }
     }
 }
@@ -160,14 +159,16 @@ pub fn menu_button_interaction(
         (&Interaction, &mut BackgroundColor),
         (With<MenuButton>, Changed<Interaction>),
     >,
-    mut next_game_state: ResMut<NextState<GameState>>,
     mut next_app_state: ResMut<NextState<AppState>>,
+    mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
         match *interaction {
             Interaction::Pressed => {
-                next_game_state.set(GameState::Play);
                 next_app_state.set(AppState::MainMenu);
+                next_main_menu_state.set(MainMenuState::Home);
+                next_game_state.set(GameState::Over);
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;

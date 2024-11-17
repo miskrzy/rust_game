@@ -1,30 +1,18 @@
-use bevy::{
-    app::Update,
-    prelude::{in_state, App, IntoSystemConfigs, OnEnter, OnExit, Plugin},
-};
+use bevy::prelude::{App, AppExtStates, Plugin};
 
-use crate::states::AppState;
+mod controls;
+mod home;
+pub mod states;
 
-mod components;
-mod constants;
-mod systems;
-
-use systems::{despawn, esc_quit_game, quit_button_interaction, spawn, start_button_interaction};
+use controls::ControlsPlugin;
+use home::HomePlugin;
+use states::MainMenuState;
 
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::MainMenu), spawn)
-            .add_systems(OnExit(AppState::MainMenu), despawn)
-            .add_systems(
-                Update,
-                (
-                    start_button_interaction,
-                    quit_button_interaction,
-                    esc_quit_game,
-                )
-                    .run_if(in_state(AppState::MainMenu)),
-            );
+        app.add_plugins((ControlsPlugin, HomePlugin))
+            .insert_state(MainMenuState::Home);
     }
 }

@@ -1,8 +1,8 @@
 use bevy::prelude::States;
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum GameState {
-    Pause,
-    Play,
-    Over,
+pub enum MainMenuState {
+    Home,
+    Controls,
+    Disabled,
 }
