@@ -39,12 +39,13 @@ jobs:
       id: get_version
       run: |
         $version = (Select-String -Pattern '^version = "' -Path Cargo.toml).Line -replace 'version = "', '' -replace '"', ''
-        Write-Host "VERSION=$version" >> $GITHUB_ENV
+        "VERSION=$version" >> $env:GITHUB_ENV
+        Write-Host $env:VERSION
 
     - name: Create Git tag
       run: |
-        git tag $VERSION
-        git push origin $VERSION
+        git tag $env:VERSION
+        git push origin $env:VERSION
 
     - name: Create Release
       id: create_release
@@ -52,8 +53,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: $VERSION
-        release_name: Release $VERSION
+        tag_name: $env:VERSION
+        release_name: Release $env:VERSION
         draft: false
         prerelease: false
 
