@@ -1,13 +1,20 @@
 name: Rust Build and Release
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  release:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
     - name: Set up Rust
       uses: actions-rs/toolchain@v1
@@ -21,26 +28,27 @@ jobs:
         command: build
         args: --release
 
-    - name: Create ZIP with files
+    - name: Create ZIP
+      shell: pwsh
       run: |
-        powershell -Command "
-          $exeFile = './target/release/game.exe'
-          &assetsDirectory = './assets'
-          $zipFile = './target/release/my_release.zip'
+        $compress = @{
+          Path = "./target/release/game.exe", "./assets"
+          CompressionLevel = "Fastest"
+          DestinationPath = "./target/release/my_release.zip"
+        }
+        Compress-Archive @compress
 
-          Compress-Archive -Path $exeFile, $assetsDirectory -DestinationPath $zipFile
-        "
-
-    - name: Get version from Cargo.toml
+    - name: Get version
       id: get_version
       run: |
         $version = (Select-String -Pattern '^version = "' -Path Cargo.toml).Line -replace 'version = "', '' -replace '"', ''
-        Write-Host "VERSION=$version" >> $env:GITHUB_ENV
+        "VERSION=$version" >> $env:GITHUB_ENV
+        Write-Host $env:VERSION
 
     - name: Create Git tag
       run: |
-        git tag ${{ env.VERSION }}
-        git push origin ${{ env.VERSION }}
+        git tag $env:VERSION
+        git push origin $env:VERSION
 
     - name: Create Release
       id: create_release
@@ -53,7 +61,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
