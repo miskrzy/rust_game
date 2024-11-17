@@ -1,6 +1,9 @@
 name: Rust Build and Release
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -23,15 +26,15 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        # args: --release
+        args: --release
 
     - name: Create ZIP
       shell: pwsh
       run: |
         $compress = @{
-          Path = "./target/debug/game.exe", "./assets"
+          Path = "./target/release/game.exe", "./assets"
           CompressionLevel = "Fastest"
-          DestinationPath = "./target/debug/my_release.zip"
+          DestinationPath = "./target/release/my_release.zip"
         }
         Compress-Archive @compress
 
@@ -64,6 +67,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .\target\debug\my_release.zip
+        asset_path: .\target\release\my_release.zip
         asset_name: release.zip
         asset_content_type: application/zip
