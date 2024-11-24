@@ -1,21 +1,18 @@
-use bevy::{
-    app::Startup,
-    prelude::{App, AppExtStates, Plugin},
-};
+use bevy::prelude::{App, AppExtStates, Plugin};
 
 mod arena;
+mod camera;
 mod enemies;
 mod hud;
-mod others;
 mod pause_menu;
 mod player;
 mod projectiles;
 pub mod states;
 
 use arena::ArenaPlugin;
+use camera::CameraPlugin;
 use enemies::EnemyPlugin;
 use hud::HUDPlugin;
-use others::spawn_camera;
 use pause_menu::PauseMenuPlugin;
 use player::PlayerPlugin;
 use projectiles::ProjectilePlugin;
@@ -32,8 +29,8 @@ impl Plugin for GamePlugin {
             ProjectilePlugin,
             PauseMenuPlugin,
             ArenaPlugin,
+            CameraPlugin,
         ))
-        .insert_state(GameState::None)
-        .add_systems(Startup, spawn_camera);
+        .insert_state(GameState::None);
     }
 }
