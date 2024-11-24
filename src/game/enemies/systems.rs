@@ -6,7 +6,7 @@ use super::{
     components::{AttackTimer, Enemy},
     constants::{
         ATTACK_SPEED, DAMAGE, INITIAL_AMOUNT, INITIAL_HEALTH, SPAWN_AROUND_PLAYER_RADIUS, SPEED,
-        SPRITE_DIAMETER, TEXTURE_PATH,
+        SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH,
     },
     resources::SpawnTimer,
 };
@@ -84,7 +84,6 @@ fn create_entity_bundle(
         SPAWN_AROUND_PLAYER_RADIUS,
         SPRITE_DIAMETER / 2.,
     );
-    let z_position: f32 = 0.0;
 
     let texture = asset_server.load(TEXTURE_PATH);
 
@@ -95,7 +94,7 @@ fn create_entity_bundle(
 
     let sprite_bundle = SpriteBundle {
         sprite: sprite,
-        transform: Transform::from_xyz(x_position, y_position, z_position),
+        transform: Transform::from_xyz(x_position, y_position, SPRITE_DEPTH),
         texture: texture,
         ..Default::default()
     };
@@ -152,9 +151,10 @@ pub fn movement(
 ) {
     if let Ok(player_transform) = player_query.get_single() {
         for mut transform in enemy_query.iter_mut() {
-            transform.translation = transform
-                .translation
-                .move_towards(player_transform.translation, SPEED * time.delta_seconds());
+            transform.translation = transform.translation.move_towards(
+                player_transform.translation.with_z(SPRITE_DEPTH),
+                SPEED * time.delta_seconds(),
+            );
         }
     }
 }
@@ -171,12 +171,12 @@ pub fn restrict_movement(
             Vec3 {
                 x: radius,
                 y: radius,
-                z: 0.0,
+                z: SPRITE_DEPTH,
             },
             Vec3 {
                 x: window.width() - radius,
                 y: window.height() - radius,
-                z: 0.0,
+                z: SPRITE_DEPTH,
             },
         );
     }

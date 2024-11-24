@@ -3,7 +3,7 @@ use crate::states::AppState;
 
 use super::super::projectiles::constants::CAST_SPEED;
 use super::components::Score;
-use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH};
 use super::{
     components::{CastTimer, Health, Player},
     constants::HEALTH_REGEN,
@@ -27,7 +27,7 @@ pub fn spawn(
     let window = window_query.get_single().unwrap();
     let x_position = window.width() / 2.;
     let y_position = window.height() / 2.;
-    let z_position: f32 = 0.0;
+    let z_position: f32 = SPRITE_DEPTH;
 
     let texture = asset_server_resource.load(TEXTURE_PATH);
     let sprite = Sprite {
@@ -74,7 +74,9 @@ pub fn movement(
             direction += Vec3::new(0.0, -1.0, 0.0);
         }
 
-        direction = direction.normalize_or_zero();
+        direction = direction
+            .normalize_or_zero()
+            .with_z(transform.translation.z);
 
         transform.translation += direction * SPEED * time.delta_seconds();
     }
@@ -91,12 +93,12 @@ pub fn restrict_movement(
             Vec3 {
                 x: radius,
                 y: radius,
-                z: 0.0,
+                z: SPRITE_DEPTH,
             },
             Vec3 {
                 x: window.width() - radius,
                 y: window.height() - radius,
-                z: 0.0,
+                z: SPRITE_DEPTH,
             },
         );
     }

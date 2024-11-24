@@ -17,4 +17,4 @@
 ## Others
 1. Release:
  - a github actions pipeline for building and creating a release
- - **pipeline uses CHANGELOG.md for release dscription**
+ - **pipeline uses CHANGELOG.md for release description**

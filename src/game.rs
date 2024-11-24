@@ -3,6 +3,7 @@ use bevy::{
     prelude::{App, AppExtStates, Plugin},
 };
 
+mod arena;
 mod enemies;
 mod hud;
 mod others;
@@ -11,6 +12,7 @@ mod player;
 mod projectiles;
 pub mod states;
 
+use arena::ArenaPlugin;
 use enemies::EnemyPlugin;
 use hud::HUDPlugin;
 use others::spawn_camera;
@@ -29,6 +31,7 @@ impl Plugin for GamePlugin {
             HUDPlugin,
             ProjectilePlugin,
             PauseMenuPlugin,
+            ArenaPlugin,
         ))
         .insert_state(GameState::None)
         .add_systems(Startup, spawn_camera);
