@@ -1,3 +1,4 @@
+##Game
 1. Main menu:
  - home screen
  - controls screen (just view)
@@ -13,6 +14,7 @@
 4. GUI:
  - score
  - health bar
-5. Release:
+##Others
+1. Release:
  - a github actions pipeline for building and creating a release
  - **pipeline uses CHANGELOG.md for release dscription**
