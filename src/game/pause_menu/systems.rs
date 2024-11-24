@@ -168,7 +168,7 @@ pub fn menu_button_interaction(
             Interaction::Pressed => {
                 next_app_state.set(AppState::MainMenu);
                 next_main_menu_state.set(MainMenuState::Home);
-                next_game_state.set(GameState::Over);
+                next_game_state.set(GameState::None);
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;

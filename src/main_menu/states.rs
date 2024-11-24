@@ -4,5 +4,5 @@ use bevy::prelude::States;
 pub enum MainMenuState {
     Home,
     Controls,
-    Disabled,
+    None,
 }
