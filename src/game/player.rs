@@ -9,7 +9,7 @@ mod systems;
 
 use super::states::GameState;
 use crate::states::AppState;
-use systems::{despawn, despawn_dead, movement, regen, restrict_movement, spawn};
+use systems::{check_dead, despawn, movement, regen, restrict_movement, spawn};
 
 pub struct PlayerPlugin;
 
@@ -18,7 +18,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(OnEnter(AppState::Game), spawn)
             .add_systems(
                 Update,
-                ((movement, restrict_movement).chain(), (despawn_dead, regen))
+                ((movement, restrict_movement).chain(), (check_dead, regen))
                     .run_if(in_state(GameState::Play)),
             )
             .add_systems(OnExit(AppState::Game), despawn);

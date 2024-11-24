@@ -1,18 +1,11 @@
-use super::super::states::MainMenuState;
-use super::components::{ControlsButton, MainMenu, QuitButton, StartButton};
-use super::constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR};
-use crate::game::states::GameState;
-use crate::states::AppState;
 use bevy::{
-    app::AppExit,
     color::{
         palettes::css::{BLACK, GRAY, WHITE},
         Color,
     },
-    input::ButtonInput,
     prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter,
-        KeyCode, NextState, NodeBundle, Query, Res, ResMut, TextBundle, With,
+        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, NextState,
+        NodeBundle, Query, ResMut, TextBundle, With,
     },
     text::{Text, TextStyle},
     ui::{
@@ -20,6 +13,13 @@ use bevy::{
         Interaction, JustifyContent, PositionType, Style, UiRect, Val,
     },
 };
+
+use super::{
+    components::{GameOverMenu, MenuButton, RestartButton},
+    constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR},
+};
+use crate::states::AppState;
+use crate::{game::states::GameState, main_menu::states::MainMenuState};
 
 pub fn spawn(mut commands: Commands) {
     let screen_node = NodeBundle {
@@ -36,24 +36,12 @@ pub fn spawn(mut commands: Commands) {
         background_color: BackgroundColor(Color::Srgba(GRAY)),
         ..Default::default()
     };
-    let start_button_node = ButtonBundle {
-        style: Style {
-            display: Display::Flex,
-            border: UiRect::all(Val::Px(2.)),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..Default::default()
-        },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
-        ..Default::default()
-    };
-    let start_text = TextBundle {
+    let game_over_text = TextBundle {
         text: Text::from_section(
-            "Start Game",
+            "GAME OVER",
             TextStyle {
                 color: Color::Srgba(WHITE),
+                font_size: 60.,
                 ..Default::default()
             },
         ),
@@ -63,7 +51,7 @@ pub fn spawn(mut commands: Commands) {
         },
         ..Default::default()
     };
-    let quit_button_node = ButtonBundle {
+    let restart_button_node = ButtonBundle {
         style: Style {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
@@ -77,9 +65,9 @@ pub fn spawn(mut commands: Commands) {
         border_radius: BorderRadius::all(Val::Percent(50.)),
         ..Default::default()
     };
-    let quit_text = TextBundle {
+    let restart_text = TextBundle {
         text: Text::from_section(
-            "Quit Game",
+            "Restart",
             TextStyle {
                 color: Color::Srgba(WHITE),
                 ..Default::default()
@@ -91,7 +79,7 @@ pub fn spawn(mut commands: Commands) {
         },
         ..Default::default()
     };
-    let controls_button_node = ButtonBundle {
+    let menu_button_node = ButtonBundle {
         style: Style {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
@@ -105,9 +93,9 @@ pub fn spawn(mut commands: Commands) {
         border_radius: BorderRadius::all(Val::Percent(50.)),
         ..Default::default()
     };
-    let controls_text = TextBundle {
+    let menu_text = TextBundle {
         text: Text::from_section(
-            "Controls",
+            "Main menu",
             TextStyle {
                 color: Color::Srgba(WHITE),
                 ..Default::default()
@@ -120,47 +108,67 @@ pub fn spawn(mut commands: Commands) {
         ..Default::default()
     };
     commands
-        .spawn((screen_node, MainMenu))
+        .spawn((screen_node, GameOverMenu))
         .with_children(|parent| {
+            parent.spawn(game_over_text);
             parent
-                .spawn((start_button_node, StartButton))
-                .with_children(|parent| {
-                    parent.spawn(start_text);
+                .spawn((restart_button_node, RestartButton))
+                .with_children(|parent: &mut bevy::prelude::ChildBuilder<'_>| {
+                    parent.spawn(restart_text);
                 });
             parent
-                .spawn((quit_button_node, QuitButton))
+                .spawn((menu_button_node, MenuButton))
                 .with_children(|parent| {
-                    parent.spawn(quit_text);
-                });
-            parent
-                .spawn((controls_button_node, ControlsButton))
-                .with_children(|parent| {
-                    parent.spawn(controls_text);
+                    parent.spawn(menu_text);
                 });
         });
 }
 
-pub fn despawn(mut commands: Commands, main_menu_query: Query<Entity, With<MainMenu>>) {
-    if let Ok(entity) = main_menu_query.get_single() {
+pub fn despawn(mut commands: Commands, pause_menu_query: Query<Entity, With<GameOverMenu>>) {
+    if let Ok(entity) = pause_menu_query.get_single() {
         commands.entity(entity).despawn_recursive();
     }
 }
 
-pub fn start_button_interaction(
+pub fn restart_button_interaction(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (With<StartButton>, Changed<Interaction>),
+        (With<RestartButton>, Changed<Interaction>),
     >,
+    mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                next_game_state.set(GameState::Play);
+                next_app_state.set(AppState::Game);
+            }
+            Interaction::Hovered => {
+                background_color.0 = BUTTON_HOVERED_COLOR;
+            }
+            Interaction::None => {
+                background_color.0 = BUTTON_COLOR;
+            }
+        }
+    }
+}
+
+pub fn menu_button_interaction(
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<MenuButton>, Changed<Interaction>),
+    >,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
         match *interaction {
             Interaction::Pressed => {
-                next_app_state.set(AppState::Game);
-                next_game_state.set(GameState::Play);
-                next_main_menu_state.set(MainMenuState::None)
+                next_app_state.set(AppState::MainMenu);
+                next_main_menu_state.set(MainMenuState::Home);
+                next_game_state.set(GameState::None);
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;
@@ -169,55 +177,5 @@ pub fn start_button_interaction(
                 background_color.0 = BUTTON_COLOR;
             }
         }
-    }
-}
-
-pub fn quit_button_interaction(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<QuitButton>, Changed<Interaction>),
-    >,
-    mut exit: EventWriter<AppExit>,
-) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
-        match *interaction {
-            Interaction::Pressed => {
-                exit.send(AppExit::Success);
-            }
-            Interaction::Hovered => {
-                background_color.0 = BUTTON_HOVERED_COLOR;
-            }
-            Interaction::None => {
-                background_color.0 = BUTTON_COLOR;
-            }
-        }
-    }
-}
-
-pub fn controls_button_interaction(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<ControlsButton>, Changed<Interaction>),
-    >,
-    mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
-) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
-        match *interaction {
-            Interaction::Pressed => {
-                next_main_menu_state.set(MainMenuState::Controls);
-            }
-            Interaction::Hovered => {
-                background_color.0 = BUTTON_HOVERED_COLOR;
-            }
-            Interaction::None => {
-                background_color.0 = BUTTON_COLOR;
-            }
-        }
-    }
-}
-
-pub fn esc_quit_game(keyboard_input: Res<ButtonInput<KeyCode>>, mut exit: EventWriter<AppExit>) {
-    if keyboard_input.pressed(KeyCode::Escape) {
-        exit.send(AppExit::Success);
     }
 }

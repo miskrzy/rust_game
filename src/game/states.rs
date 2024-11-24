@@ -4,5 +4,5 @@ use bevy::prelude::States;
 pub enum GameState {
     Pause,
     Play,
-    Over,
+    None,
 }

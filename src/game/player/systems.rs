@@ -1,3 +1,6 @@
+use crate::game::states::GameState;
+use crate::states::AppState;
+
 use super::super::projectiles::constants::CAST_SPEED;
 use super::components::Score;
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
@@ -9,7 +12,7 @@ use bevy::{
     asset::AssetServer,
     input::ButtonInput,
     math::{Vec2, Vec3},
-    prelude::{Commands, Entity, KeyCode, Query, Res, Transform, Window, With},
+    prelude::{Commands, Entity, KeyCode, NextState, Query, Res, ResMut, Transform, Window, With},
     sprite::{Sprite, SpriteBundle},
     time::{Time, Timer, TimerMode},
     window::PrimaryWindow,
@@ -99,11 +102,16 @@ pub fn restrict_movement(
     }
 }
 
-pub fn despawn_dead(player_query: Query<(Entity, &Health), With<Player>>, mut commands: Commands) {
-    if let Ok((entity, health)) = player_query.get_single() {
+pub fn check_dead(
+    player_query: Query<&Health, With<Player>>,
+    mut next_app_state: ResMut<NextState<AppState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    if let Ok(health) = player_query.get_single() {
         if health.is_dead() {
-            commands.entity(entity).despawn();
             println!("Player is dead");
+            next_game_state.set(GameState::None);
+            next_app_state.set(AppState::GameOver)
         }
     }
 }
