@@ -46,13 +46,6 @@ jobs:
         "VERSION=$version" >> $env:GITHUB_ENV
         Write-Host $env:VERSION
 
-    - name: Get Release Notes
-      id: get_release_notes
-      run: |
-        $release_notes = Get-Content RELEASE_NOTES.md -Raw
-        "RELEASE_NOTES=$release_notes" >> $env:GITHUB_ENV
-        Write-Host $env:RELEASE_NOTES
-
     - name: Create Git tag
       run: |
         git tag $env:VERSION
@@ -66,7 +59,7 @@ jobs:
       with:
         tag_name: ${{ env.VERSION }}
         release_name: Release ${{ env.VERSION }}
-        body: ${{ env.RELEASE_NOTES }}
+        body_path: RELEASE_NOTES.md
         draft: false
         prerelease: false
 
