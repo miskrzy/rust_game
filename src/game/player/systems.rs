@@ -1,9 +1,10 @@
 use crate::game::states::GameState;
 use crate::states::AppState;
 
+use super::super::arena::constants::{HEIGHT as ARENA_HEIGHT, WIDTH as ARENA_WIDTH};
 use super::super::projectiles::constants::CAST_SPEED;
 use super::components::Score;
-use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH};
 use super::{
     components::{CastTimer, Health, Player},
     constants::HEALTH_REGEN,
@@ -27,7 +28,7 @@ pub fn spawn(
     let window = window_query.get_single().unwrap();
     let x_position = window.width() / 2.;
     let y_position = window.height() / 2.;
-    let z_position: f32 = 0.0;
+    let z_position: f32 = SPRITE_DEPTH;
 
     let texture = asset_server_resource.load(TEXTURE_PATH);
     let sprite = Sprite {
@@ -74,7 +75,9 @@ pub fn movement(
             direction += Vec3::new(0.0, -1.0, 0.0);
         }
 
-        direction = direction.normalize_or_zero();
+        direction = direction
+            .normalize_or_zero()
+            .with_z(transform.translation.z);
 
         transform.translation += direction * SPEED * time.delta_seconds();
     }
@@ -84,21 +87,21 @@ pub fn restrict_movement(
     mut player_query: Query<&mut Transform, With<Player>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let window = window_query.get_single().unwrap();
     if let Ok(mut transform) = player_query.get_single_mut() {
+        let window = window_query.get_single().unwrap();
+        let window_center = window.size() / 2.;
         let radius = SPRITE_DIAMETER / 2.0;
-        transform.translation = transform.translation.clamp(
-            Vec3 {
-                x: radius,
-                y: radius,
-                z: 0.0,
-            },
-            Vec3 {
-                x: window.width() - radius,
-                y: window.height() - radius,
-                z: 0.0,
-            },
-        );
+        let min_vec = Vec3 {
+            x: window_center.x - ARENA_WIDTH / 2. + radius,
+            y: window_center.y - ARENA_HEIGHT / 2. + radius,
+            z: SPRITE_DEPTH,
+        };
+        let max_vec = Vec3 {
+            x: window_center.x + ARENA_WIDTH / 2. - radius,
+            y: window_center.y + ARENA_HEIGHT / 2. - radius,
+            z: SPRITE_DEPTH,
+        };
+        transform.translation = transform.translation.clamp(min_vec, max_vec);
     }
 }
 

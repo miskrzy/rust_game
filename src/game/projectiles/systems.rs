@@ -7,7 +7,7 @@ use super::super::{
 use super::constants::DAMAGE;
 use super::{
     components::Projectile,
-    constants::{SPEED, SPRITE_DIAMETER, TEXTURE_PATH},
+    constants::{SPEED, SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH},
 };
 use bevy::{
     asset::AssetServer,
@@ -42,18 +42,20 @@ pub fn spawn(
             }
 
             if let Some(enemy_translation) = closest_enemy.0 {
-                let projectile =
-                    Projectile::new(player_transform.translation, enemy_translation, SPEED);
+                let start_position = player_transform.translation.with_z(SPRITE_DEPTH);
+                let target_position = enemy_translation.with_z(SPRITE_DEPTH);
+                let projectile = Projectile::new(start_position, target_position, SPEED);
 
                 let sprite = Sprite {
                     custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
                     ..Default::default()
                 };
 
+                let transform = Transform::from_translation(start_position);
                 let sprite_bundle = SpriteBundle {
                     sprite: sprite,
                     texture: asset_server.load(TEXTURE_PATH),
-                    transform: player_transform.clone(),
+                    transform: transform,
                     ..Default::default()
                 };
 

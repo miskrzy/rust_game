@@ -11,10 +11,15 @@
 3. Pause Menu:
  - can pause unpause with esc
  - can resume or exit to main menu
-4. GUI:
+4. **Retry menu**
+ - **added restart screen after player looses**
+5. **Arena**
+ - **arena is now larger than the screen**
+ - **camera follows the player but only within the area of the arena**
+6. GUI:
  - score
  - health bar
 ## Others
 1. Release:
  - a github actions pipeline for building and creating a release
- - **pipeline uses CHANGELOG.md for release dscription**
+ - pipeline uses CHANGELOG.md for release description
