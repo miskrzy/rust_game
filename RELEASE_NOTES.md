@@ -10,7 +10,7 @@
  - player death spawns a game over screen
 3. Pause Menu:
  - can pause unpause with esc
- - can resume or exit to main 
+ - can resume or exit to main menu
 4. **Arena**
  - **arena is now larger than the screen**
  - **camera follows the player but only within the area of the arena**
