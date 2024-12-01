@@ -11,8 +11,6 @@
 3. Pause Menu:
  - can pause unpause with esc
  - can resume or exit to main menu
-4. **Retry menu**
- - **added restart screen after player looses**
 5. **Arena**
  - **arena is now larger than the screen**
  - **camera follows the player but only within the area of the arena**
