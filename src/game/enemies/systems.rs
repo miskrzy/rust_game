@@ -1,3 +1,4 @@
+use super::super::arena::constants::{HEIGHT as ARENA_HEIGHT, WIDTH as ARENA_WIDTH};
 use super::super::player::{
     components::{Health, Player},
     constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
@@ -60,8 +61,7 @@ fn create_entity_bundle(
     player_query: &Query<&Transform, With<Player>>,
 ) -> (SpriteBundle, Enemy, AttackTimer, Health) {
     let window = window_query.get_single().unwrap();
-    let window_width = window.width();
-    let window_height = window.height();
+    let window_position = window.size() / 2.;
 
     let (player_x, player_y) = if let Ok(player_transform) = player_query.get_single() {
         (
@@ -69,16 +69,16 @@ fn create_entity_bundle(
             player_transform.translation.y,
         )
     } else {
-        (window_width / 2., window_height / 2.)
+        (window_position.x, window_position.y)
     };
 
     let enemy_radius = SPRITE_DIAMETER / 2.;
 
     let (x_position, y_position) = create_random_position(
-        enemy_radius,
-        window_width - enemy_radius,
-        enemy_radius,
-        window_height - enemy_radius,
+        window_position.x - ARENA_WIDTH / 2. + enemy_radius,
+        window_position.x + ARENA_WIDTH / 2. - enemy_radius,
+        window_position.y - ARENA_HEIGHT / 2. + enemy_radius,
+        window_position.y + ARENA_HEIGHT / 2. - enemy_radius,
         player_x,
         player_y,
         SPAWN_AROUND_PLAYER_RADIUS,
@@ -164,21 +164,21 @@ pub fn restrict_movement(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.get_single().unwrap();
+    let window_center = window.size() / 2.;
+    let radius = SPRITE_DIAMETER / 2.;
 
     for mut transform in enemy_query.iter_mut() {
-        let radius = SPRITE_DIAMETER / 2.;
-        transform.translation = transform.translation.clamp(
-            Vec3 {
-                x: radius,
-                y: radius,
-                z: SPRITE_DEPTH,
-            },
-            Vec3 {
-                x: window.width() - radius,
-                y: window.height() - radius,
-                z: SPRITE_DEPTH,
-            },
-        );
+        let min_vec = Vec3 {
+            x: window_center.x - ARENA_WIDTH / 2. + radius,
+            y: window_center.y - ARENA_HEIGHT / 2. + radius,
+            z: SPRITE_DEPTH,
+        };
+        let max_vec = Vec3 {
+            x: window_center.x + ARENA_WIDTH / 2. - radius,
+            y: window_center.y + ARENA_HEIGHT / 2. - radius,
+            z: SPRITE_DEPTH,
+        };
+        transform.translation = transform.translation.clamp(min_vec, max_vec);
     }
 }
 

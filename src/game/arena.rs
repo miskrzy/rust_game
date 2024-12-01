@@ -4,7 +4,7 @@ use systems::{despawn, spawn};
 use crate::states::AppState;
 
 mod components;
-mod constants;
+pub mod constants;
 mod systems;
 
 pub struct ArenaPlugin;

@@ -36,7 +36,7 @@ pub fn spawn(
         ImageScaleMode::Tiled {
             tile_x: true,
             tile_y: true,
-            stretch_value: 0.5,
+            stretch_value: 1.,
         },
         Arena,
     ));
