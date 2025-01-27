@@ -2,10 +2,13 @@ use crate::game::player::components::Score;
 
 use super::super::player::components::{Health, Player};
 use super::{
-    components::{GreenHealthBar, HUDNode, RedHealthBar, ScoreNode},
+    components::{GreenHealthBar, HUDNode, RedHealthBar, ScoreText},
     constants::HEALTH_BAR_LENGTH,
 };
+use bevy::hierarchy::ChildBuild;
 use bevy::prelude::{DespawnRecursiveExt, Entity};
+use bevy::text::TextColor;
+use bevy::ui::{AlignItems, FlexDirection, JustifyContent, UiRect};
 use bevy::{
     color::{
         palettes::{
@@ -14,14 +17,13 @@ use bevy::{
         },
         Color,
     },
-    prelude::{BuildChildren, Commands, NodeBundle, Query, TextBundle, With, Without},
-    text::{Text, TextSection, TextStyle},
-    ui::{BackgroundColor, Display, PositionType, Style, Val},
+    prelude::{BuildChildren, Commands, Node, Query, Text, With, Without},
+    ui::{BackgroundColor, Display, PositionType, Val},
 };
 
 pub fn spawn(mut commands: Commands) {
-    let top_node = NodeBundle {
-        style: Style {
+    let top_node_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -29,10 +31,10 @@ pub fn spawn(mut commands: Commands) {
             top: Val::Percent(0.),
             ..Default::default()
         },
-        ..Default::default()
-    };
-    let health_bar_green = NodeBundle {
-        style: Style {
+        HUDNode,
+    );
+    let health_bar_green_bundle = (
+        Node {
             display: Display::Flex,
             width: Val::Px(HEALTH_BAR_LENGTH),
             height: Val::Px(20.),
@@ -40,11 +42,11 @@ pub fn spawn(mut commands: Commands) {
             left: Val::Px(10.),
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GREEN_500)),
-        ..Default::default()
-    };
-    let health_bar_red = NodeBundle {
-        style: Style {
+        BackgroundColor(Color::Srgba(GREEN_500)),
+        GreenHealthBar,
+    );
+    let health_bar_red_bundle = (
+        Node {
             display: Display::Flex,
             width: Val::Px(0.),
             height: Val::Px(20.),
@@ -52,43 +54,50 @@ pub fn spawn(mut commands: Commands) {
             left: Val::Px(10.),
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(RED_500)),
-        ..Default::default()
-    };
-    let score = TextBundle::from_sections([
-        TextSection::new(
-            "Score: ",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        TextSection::new(
-            "0",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-    ])
-    .with_style(Style {
+        BackgroundColor(Color::Srgba(RED_500)),
+        RedHealthBar,
+    );
+    let score_node = Node {
         display: Display::Flex,
         position_type: PositionType::Absolute,
+        flex_direction: FlexDirection::Row,
         top: Val::Px(10.),
         right: Val::Px(10.),
         ..Default::default()
-    });
-    commands.spawn((top_node, HUDNode)).with_children(|parent| {
-        parent.spawn((health_bar_green, GreenHealthBar));
-        parent.spawn((health_bar_red, RedHealthBar));
-        parent.spawn((score, ScoreNode));
+    };
+    let score_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
+        ..Default::default()
+    };
+    let score_text_bundle = (Text::new("Score: "), TextColor(Color::Srgba(WHITE)));
+    let points_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
+        ..Default::default()
+    };
+    let points_text_bundle = (Text::new("0"), TextColor(Color::Srgba(WHITE)), ScoreText);
+
+    commands.spawn(top_node_bundle).with_children(|parent| {
+        parent.spawn(health_bar_green_bundle);
+        parent.spawn(health_bar_red_bundle);
+        parent.spawn(score_node).with_children(|parent| {
+            parent.spawn(score_text_node).with_child(score_text_bundle);
+            parent
+                .spawn(points_text_node)
+                .with_child(points_text_bundle);
+        });
     });
 }
 
 pub fn update_health_bar(
     player_query: Query<&Health, With<Player>>,
-    mut green_health_bar_query: Query<&mut Style, (With<GreenHealthBar>, Without<RedHealthBar>)>,
-    mut red_health_bar_query: Query<&mut Style, (With<RedHealthBar>, Without<GreenHealthBar>)>,
+    mut green_health_bar_query: Query<&mut Node, (With<GreenHealthBar>, Without<RedHealthBar>)>,
+    mut red_health_bar_query: Query<&mut Node, (With<RedHealthBar>, Without<GreenHealthBar>)>,
 ) {
     if let Ok(player_health) = player_query.get_single() {
         let current = player_health.current();
@@ -106,11 +115,11 @@ pub fn update_health_bar(
 }
 
 pub fn update_score(
-    mut score_node: Query<&mut Text, With<ScoreNode>>,
+    mut score_node: Query<&mut Text, With<ScoreText>>,
     player_query: Query<&Score, With<Player>>,
 ) {
     if let (Ok(mut text), Ok(score)) = (score_node.get_single_mut(), player_query.get_single()) {
-        text.sections[1].value = score.score.to_string();
+        text.0 = score.score.to_string();
     }
 }
 

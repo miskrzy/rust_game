@@ -4,13 +4,13 @@ use bevy::{
         Color,
     },
     prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, NextState,
-        NodeBundle, Query, ResMut, TextBundle, With,
+        BuildChildren, Button, Changed, ChildBuild, Commands, DespawnRecursiveExt, Entity,
+        NextState, Node, Query, ResMut, Text, With,
     },
-    text::{Text, TextStyle},
+    text::TextColor,
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
-        Interaction, JustifyContent, PositionType, Style, UiRect, Val,
+        Interaction, JustifyContent, PositionType, UiRect, Val,
     },
 };
 
@@ -22,8 +22,8 @@ use crate::states::AppState;
 use crate::{game::states::GameState, main_menu::states::MainMenuState};
 
 pub fn spawn(mut commands: Commands) {
-    let screen_node = NodeBundle {
-        style: Style {
+    let screen_node_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -33,26 +33,23 @@ pub fn spawn(mut commands: Commands) {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY)),
+        BackgroundColor(Color::Srgba(GRAY)),
+        GameOverMenu,
+    );
+    let game_over_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let game_over_text = TextBundle {
-        text: Text::from_section(
-            "GAME OVER",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                font_size: 60.,
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    let restart_button_node = ButtonBundle {
-        style: Style {
+    let game_over_text_bundle = (
+        Text::new("GAME OVER"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    let restart_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -60,27 +57,26 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        RestartButton,
+    );
+    let restart_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let restart_text = TextBundle {
-        text: Text::from_section(
-            "Restart",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    let menu_button_node = ButtonBundle {
-        style: Style {
+    let restart_text_bundle = (
+        Text::new("Restart"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    let menu_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -88,40 +84,37 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        MenuButton,
+    );
+    let menu_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let menu_text = TextBundle {
-        text: Text::from_section(
-            "Main menu",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    commands
-        .spawn((screen_node, GameOverMenu))
-        .with_children(|parent| {
-            parent.spawn(game_over_text);
+    let menu_text_bundle = (
+        Text::new("Main menu"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    commands.spawn(screen_node_bundle).with_children(|parent| {
+        parent
+            .spawn(game_over_text_node)
+            .with_child(game_over_text_bundle);
+        parent.spawn(restart_button_bundle).with_children(|parent| {
             parent
-                .spawn((restart_button_node, RestartButton))
-                .with_children(|parent: &mut bevy::prelude::ChildBuilder<'_>| {
-                    parent.spawn(restart_text);
-                });
-            parent
-                .spawn((menu_button_node, MenuButton))
-                .with_children(|parent| {
-                    parent.spawn(menu_text);
-                });
+                .spawn(restart_text_node)
+                .with_child(restart_text_bundle);
         });
+        parent.spawn(menu_button_bundle).with_children(|parent| {
+            parent.spawn(menu_text_node).with_child(menu_text_bundle);
+        });
+    });
 }
 
 pub fn despawn(mut commands: Commands, pause_menu_query: Query<Entity, With<GameOverMenu>>) {

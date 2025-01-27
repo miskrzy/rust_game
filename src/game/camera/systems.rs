@@ -1,6 +1,6 @@
 use bevy::{
     math::Vec3,
-    prelude::{Camera2dBundle, Commands, Query, Transform, Window, With, Without},
+    prelude::{Camera2d, Commands, Query, Transform, Window, With, Without},
     window::PrimaryWindow,
 };
 
@@ -15,12 +15,11 @@ pub fn spawn(mut commands: Commands, window_query: Query<&Window, With<PrimaryWi
     let y_position = window.height() / 2.;
     let z_position: f32 = DEPTH;
 
-    let camera_bundle = Camera2dBundle {
-        transform: Transform::from_xyz(x_position, y_position, z_position),
-        ..Default::default()
-    };
-
-    commands.spawn((camera_bundle, GameCamera));
+    commands.spawn((
+        Camera2d,
+        Transform::from_xyz(x_position, y_position, z_position),
+        GameCamera,
+    ));
 }
 
 pub fn follow_player(

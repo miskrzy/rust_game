@@ -7,13 +7,13 @@ use bevy::{
         Color,
     },
     prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, NextState,
-        NodeBundle, Query, ResMut, TextBundle, With,
+        BuildChildren, Button, Changed, ChildBuild, Commands, DespawnRecursiveExt, Entity,
+        NextState, Node, Query, ResMut, Text, With,
     },
-    text::{Text, TextStyle},
+    text::TextColor,
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
-        Interaction, JustifyContent, Overflow, PositionType, Style, UiRect, Val,
+        Interaction, JustifyContent, Overflow, PositionType, UiRect, Val,
     },
 };
 
@@ -25,8 +25,8 @@ use super::{
 };
 
 pub fn spawn(mut commands: Commands) {
-    let screen_node = NodeBundle {
-        style: Style {
+    let screen_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -34,12 +34,12 @@ pub fn spawn(mut commands: Commands) {
             flex_direction: FlexDirection::Column,
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY)),
-        ..Default::default()
-    };
+        BackgroundColor(Color::Srgba(GRAY)),
+        ControlsScreen,
+    );
 
-    let controls_node = NodeBundle {
-        style: Style {
+    let controls_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -51,12 +51,11 @@ pub fn spawn(mut commands: Commands) {
             overflow: Overflow::clip_y(),
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY)),
-        ..Default::default()
-    };
+        BackgroundColor(Color::Srgba(GRAY)),
+    );
 
-    let buttons_node = NodeBundle {
-        style: Style {
+    let buttons_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -67,12 +66,11 @@ pub fn spawn(mut commands: Commands) {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY)),
-        ..Default::default()
-    };
+        BackgroundColor(Color::Srgba(GRAY)),
+    );
 
-    let return_button = ButtonBundle {
-        style: Style {
+    let return_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -80,33 +78,31 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(2.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        ReturnButton,
+    );
+
+    let return_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
+    let return_text_bundle = (
+        Text::new("Return"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
 
-    let return_text = TextBundle {
-        text: Text::from_section(
-            "Return",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-
-    let mut row_nodes: Vec<(NodeBundle, NodeBundle, TextBundle, NodeBundle, TextBundle)> =
-        Vec::new();
+    let mut row_nodes = Vec::new();
     for (description, key) in CONTROLS {
         row_nodes.push((
-            NodeBundle {
-                style: Style {
+            (
+                Node {
                     display: Display::Flex,
                     width: Val::Percent(90.),
                     flex_direction: FlexDirection::Row,
@@ -114,12 +110,11 @@ pub fn spawn(mut commands: Commands) {
                     margin: UiRect::vertical(Val::Px(5.)),
                     ..Default::default()
                 },
-                border_radius: BorderRadius::all(Val::Percent(50.)),
-                background_color: BackgroundColor(Color::Srgba(GRAY_700)),
-                ..Default::default()
-            },
-            NodeBundle {
-                style: Style {
+                BorderRadius::all(Val::Percent(50.)),
+                BackgroundColor(Color::Srgba(GRAY_700)),
+            ),
+            (
+                Node {
                     display: Display::Flex,
                     width: Val::Percent(60.),
                     left: Val::Percent(1.),
@@ -128,26 +123,23 @@ pub fn spawn(mut commands: Commands) {
                     margin: UiRect::vertical(Val::Px(5.)),
                     ..Default::default()
                 },
-                border_radius: BorderRadius::all(Val::Percent(50.)),
-                background_color: BackgroundColor(Color::Srgba(GRAY_500)),
+                BorderRadius::all(Val::Percent(50.)),
+                BackgroundColor(Color::Srgba(GRAY_500)),
+            ),
+            Node {
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                margin: UiRect::all(Val::Px(10.)),
                 ..Default::default()
             },
-            TextBundle {
-                text: Text::from_section(
-                    description,
-                    TextStyle {
-                        color: Color::Srgba(WHITE),
-                        ..Default::default()
-                    },
-                ),
-                style: Style {
-                    margin: UiRect::all(Val::Px(5.)),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-            NodeBundle {
-                style: Style {
+            (
+                Text::new(description),
+                TextColor(Color::Srgba(WHITE)),
+                // margin: UiRect::all(Val::Px(5.)),
+            ),
+            (
+                Node {
                     display: Display::Flex,
                     position_type: PositionType::Absolute,
                     right: Val::Percent(1.),
@@ -157,50 +149,55 @@ pub fn spawn(mut commands: Commands) {
                     margin: UiRect::vertical(Val::Px(5.)),
                     ..Default::default()
                 },
-                border_radius: BorderRadius::all(Val::Percent(50.)),
-                background_color: BackgroundColor(Color::Srgba(GRAY_500)),
+                BorderRadius::all(Val::Percent(50.)),
+                BackgroundColor(Color::Srgba(GRAY_500)),
+            ),
+            Node {
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                margin: UiRect::all(Val::Px(10.)),
                 ..Default::default()
             },
-            TextBundle {
-                text: Text::from_section(
-                    key,
-                    TextStyle {
-                        color: Color::Srgba(WHITE),
-                        ..Default::default()
-                    },
-                ),
-                style: Style {
-                    margin: UiRect::all(Val::Px(5.)),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
+            (
+                Text::new(key),
+                TextColor(Color::Srgba(WHITE)),
+                // margin: UiRect::all(Val::Px(5.)),
+            ),
         ));
     }
-    commands
-        .spawn((screen_node, ControlsScreen))
-        .with_children(|parent| {
-            parent.spawn(controls_node).with_children(|parent| {
-                for (row_node, description_node, description_text, key_node, key_text) in row_nodes
-                {
-                    parent.spawn(row_node).with_children(|parent| {
-                        parent.spawn(description_node).with_children(|parent| {
-                            parent.spawn(description_text);
-                        });
-                        parent.spawn(key_node).with_children(|parent| {
-                            parent.spawn(key_text);
-                        });
+    commands.spawn(screen_bundle).with_children(|parent| {
+        parent.spawn(controls_bundle).with_children(|parent| {
+            for (
+                row_node,
+                description_node,
+                description_text_node,
+                description_text_bundle,
+                key_node,
+                key_text_node,
+                key_text_bundle,
+            ) in row_nodes
+            {
+                parent.spawn(row_node).with_children(|parent| {
+                    parent.spawn(description_node).with_children(|parent| {
+                        parent
+                            .spawn(description_text_node)
+                            .with_child(description_text_bundle);
                     });
-                }
-            });
-            parent.spawn(buttons_node).with_children(|parent| {
+                    parent.spawn(key_node).with_children(|parent| {
+                        parent.spawn(key_text_node).with_child(key_text_bundle);
+                    });
+                });
+            }
+        });
+        parent.spawn(buttons_bundle).with_children(|parent| {
+            parent.spawn(return_button_bundle).with_children(|parent| {
                 parent
-                    .spawn((return_button, ReturnButton))
-                    .with_children(|parent| {
-                        parent.spawn(return_text);
-                    });
+                    .spawn(return_text_node)
+                    .with_child(return_text_bundle);
             });
         });
+    });
 }
 
 pub fn despawn(mut commands: Commands, controls_query: Query<Entity, With<ControlsScreen>>) {
