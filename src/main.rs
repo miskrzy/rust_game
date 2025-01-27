@@ -1,6 +1,6 @@
 use bevy::{
     prelude::{App, AppExtStates, DefaultPlugins, PluginGroup},
-    window::{Window, WindowMode, WindowPlugin},
+    window::{MonitorSelection, Window, WindowMode, WindowPlugin},
 };
 
 pub mod game;
@@ -16,7 +16,7 @@ use states::AppState;
 fn main() {
     let window_plugin = WindowPlugin {
         primary_window: Some(Window {
-            mode: WindowMode::BorderlessFullscreen,
+            mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
             ..Default::default()
         }),
         ..Default::default()

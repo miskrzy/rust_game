@@ -18,7 +18,7 @@ use bevy::{
         Vec2, Vec3,
     },
     prelude::{Commands, Entity, Query, Res, ResMut, Transform, With, Without},
-    sprite::{Sprite, SpriteBundle},
+    sprite::Sprite,
     time::{Time, Timer, TimerMode},
     window::{PrimaryWindow, Window},
 };
@@ -59,7 +59,7 @@ fn create_entity_bundle(
     window_query: &Query<&Window, With<PrimaryWindow>>,
     asset_server: &Res<AssetServer>,
     player_query: &Query<&Transform, With<Player>>,
-) -> (SpriteBundle, Enemy, AttackTimer, Health) {
+) -> (Sprite, Transform, Enemy, AttackTimer, Health) {
     let window = window_query.get_single().unwrap();
     let window_position = window.size() / 2.;
 
@@ -89,13 +89,7 @@ fn create_entity_bundle(
 
     let sprite = Sprite {
         custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
-        ..Default::default()
-    };
-
-    let sprite_bundle = SpriteBundle {
-        sprite: sprite,
-        transform: Transform::from_xyz(x_position, y_position, SPRITE_DEPTH),
-        texture: texture,
+        image: texture,
         ..Default::default()
     };
 
@@ -104,7 +98,8 @@ fn create_entity_bundle(
     let attack_timer = AttackTimer { timer: timer };
 
     (
-        sprite_bundle,
+        sprite,
+        Transform::from_xyz(x_position, y_position, SPRITE_DEPTH),
         Enemy,
         attack_timer,
         Health::new(INITIAL_HEALTH, 0.),
@@ -153,7 +148,7 @@ pub fn movement(
         for mut transform in enemy_query.iter_mut() {
             transform.translation = transform.translation.move_towards(
                 player_transform.translation.with_z(SPRITE_DEPTH),
-                SPEED * time.delta_seconds(),
+                SPEED * time.delta_secs(),
             );
         }
     }

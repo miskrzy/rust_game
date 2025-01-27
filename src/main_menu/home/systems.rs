@@ -3,6 +3,8 @@ use super::components::{ControlsButton, MainMenu, QuitButton, StartButton};
 use super::constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR};
 use crate::game::states::GameState;
 use crate::states::AppState;
+use bevy::prelude::ChildBuild;
+use bevy::text::TextColor;
 use bevy::{
     app::AppExit,
     color::{
@@ -11,19 +13,18 @@ use bevy::{
     },
     input::ButtonInput,
     prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter,
-        KeyCode, NextState, NodeBundle, Query, Res, ResMut, TextBundle, With,
+        BuildChildren, Button, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter,
+        KeyCode, NextState, Node, Query, Res, ResMut, Text, With,
     },
-    text::{Text, TextStyle},
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
-        Interaction, JustifyContent, PositionType, Style, UiRect, Val,
+        Interaction, JustifyContent, PositionType, UiRect, Val,
     },
 };
 
 pub fn spawn(mut commands: Commands) {
-    let screen_node = NodeBundle {
-        style: Style {
+    let screen_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -33,66 +34,38 @@ pub fn spawn(mut commands: Commands) {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY)),
-        ..Default::default()
-    };
-    let start_button_node = ButtonBundle {
-        style: Style {
+        BackgroundColor(Color::Srgba(GRAY)),
+        MainMenu,
+    );
+    let start_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            ..Default::default()
-        },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
-        ..Default::default()
-    };
-    let start_text = TextBundle {
-        text: Text::from_section(
-            "Start Game",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
             margin: UiRect::all(Val::Px(10.)),
             ..Default::default()
         },
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        StartButton,
+    );
+    let start_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let quit_button_node = ButtonBundle {
-        style: Style {
-            display: Display::Flex,
-            border: UiRect::all(Val::Px(2.)),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            margin: UiRect::vertical(Val::Px(10.)),
-            ..Default::default()
-        },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
-        ..Default::default()
-    };
-    let quit_text = TextBundle {
-        text: Text::from_section(
-            "Quit Game",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    let controls_button_node = ButtonBundle {
-        style: Style {
+    let start_text_bundle = (
+        Text::new("Start Game"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    let quit_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -100,44 +73,66 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        Button,
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        QuitButton,
+    );
+    let quit_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let controls_text = TextBundle {
-        text: Text::from_section(
-            "Controls",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
+    let quit_text_bundle = (
+        Text::new("Quit Game"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    let controls_button_bundle = (
+        Node {
+            display: Display::Flex,
+            border: UiRect::all(Val::Px(2.)),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        ControlsButton,
+    );
+    let controls_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    commands
-        .spawn((screen_node, MainMenu))
-        .with_children(|parent| {
-            parent
-                .spawn((start_button_node, StartButton))
-                .with_children(|parent| {
-                    parent.spawn(start_text);
-                });
-            parent
-                .spawn((quit_button_node, QuitButton))
-                .with_children(|parent| {
-                    parent.spawn(quit_text);
-                });
-            parent
-                .spawn((controls_button_node, ControlsButton))
-                .with_children(|parent| {
-                    parent.spawn(controls_text);
-                });
+    let controls_text_bundle = (
+        Text::new("Controls"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    commands.spawn(screen_bundle).with_children(|parent| {
+        parent.spawn(start_button_bundle).with_children(|parent| {
+            parent.spawn(start_text_node).with_child(start_text_bundle);
         });
+        parent.spawn(quit_button_bundle).with_children(|parent| {
+            parent.spawn(quit_text_node).with_child(quit_text_bundle);
+        });
+        parent
+            .spawn(controls_button_bundle)
+            .with_children(|parent| {
+                parent
+                    .spawn(controls_text_node)
+                    .with_child(controls_text_bundle);
+            });
+    });
 }
 
 pub fn despawn(mut commands: Commands, main_menu_query: Query<Entity, With<MainMenu>>) {

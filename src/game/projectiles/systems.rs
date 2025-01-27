@@ -16,7 +16,7 @@ use bevy::{
         Vec2, Vec3,
     },
     prelude::{Commands, Entity, Query, Res, Transform, With, Without},
-    sprite::{Sprite, SpriteBundle},
+    sprite::Sprite,
     time::Time,
 };
 use std::collections::HashSet;
@@ -47,19 +47,14 @@ pub fn spawn(
                 let projectile = Projectile::new(start_position, target_position, SPEED);
 
                 let sprite = Sprite {
+                    image: asset_server.load(TEXTURE_PATH),
                     custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
                     ..Default::default()
                 };
 
                 let transform = Transform::from_translation(start_position);
-                let sprite_bundle = SpriteBundle {
-                    sprite: sprite,
-                    texture: asset_server.load(TEXTURE_PATH),
-                    transform: transform,
-                    ..Default::default()
-                };
 
-                commands.spawn((projectile, sprite_bundle));
+                commands.spawn((projectile, transform, sprite));
                 cast_timer.timer.reset();
             }
         }

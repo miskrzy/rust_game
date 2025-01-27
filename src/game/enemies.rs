@@ -33,7 +33,7 @@ impl Plugin for EnemyPlugin {
                 (movement, restrict_movement).chain(),
                 (attack_player, spawn_over_time, despawn_dead),
             )
-                .run_if(in_state(AppState::Game).and_then(in_state(GameState::Play))),
+                .run_if(in_state(AppState::Game).and(in_state(GameState::Play))),
         )
         .add_systems(OnExit(AppState::Game), despawn);
     }

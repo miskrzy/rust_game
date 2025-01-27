@@ -7,7 +7,7 @@ pub struct GreenHealthBar;
 pub struct RedHealthBar;
 
 #[derive(Component)]
-pub struct ScoreNode;
+pub struct ScoreText;
 
 #[derive(Component)]
 pub struct HUDNode;

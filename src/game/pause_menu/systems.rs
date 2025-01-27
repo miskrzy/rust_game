@@ -3,15 +3,16 @@ use bevy::{
         palettes::css::{BLACK, GRAY, WHITE},
         Alpha, Color,
     },
+    hierarchy::ChildBuild,
     input::ButtonInput,
     prelude::{
-        BuildChildren, ButtonBundle, Changed, Commands, DespawnRecursiveExt, Entity, KeyCode,
-        NextState, NodeBundle, Query, Res, ResMut, State, TextBundle, With,
+        BuildChildren, Button, Changed, Commands, DespawnRecursiveExt, Entity, KeyCode, NextState,
+        Node, Query, Res, ResMut, State, Text, With,
     },
-    text::{Text, TextStyle},
+    text::TextColor,
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
-        Interaction, JustifyContent, PositionType, Style, UiRect, Val,
+        Interaction, JustifyContent, PositionType, UiRect, Val,
     },
 };
 
@@ -24,8 +25,8 @@ use crate::main_menu::states::MainMenuState;
 use crate::states::AppState;
 
 pub fn spawn(mut commands: Commands) {
-    let screen_node = NodeBundle {
-        style: Style {
+    let screen_node_bundle = (
+        Node {
             display: Display::Flex,
             position_type: PositionType::Absolute,
             width: Val::Percent(100.),
@@ -35,11 +36,11 @@ pub fn spawn(mut commands: Commands) {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: BackgroundColor(Color::Srgba(GRAY).with_alpha(0.5)),
-        ..Default::default()
-    };
-    let resume_button_node = ButtonBundle {
-        style: Style {
+        BackgroundColor(Color::Srgba(GRAY).with_alpha(0.5)),
+        PauseMenu,
+    );
+    let resume_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -47,27 +48,26 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        ResumeButton,
+    );
+    let resume_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let resume_text = TextBundle {
-        text: Text::from_section(
-            "Resume",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    let menu_button_node = ButtonBundle {
-        style: Style {
+    let resume_text_bundle = (
+        Text::new("Resume"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    let menu_button_bundle = (
+        Node {
             display: Display::Flex,
             border: UiRect::all(Val::Px(2.)),
             justify_content: JustifyContent::Center,
@@ -75,39 +75,34 @@ pub fn spawn(mut commands: Commands) {
             margin: UiRect::vertical(Val::Px(10.)),
             ..Default::default()
         },
-        background_color: BackgroundColor(BUTTON_COLOR),
-        border_color: BorderColor(Color::Srgba(BLACK)),
-        border_radius: BorderRadius::all(Val::Percent(50.)),
+        BackgroundColor(BUTTON_COLOR),
+        BorderColor(Color::Srgba(BLACK)),
+        BorderRadius::all(Val::Percent(50.)),
+        Button,
+        MenuButton,
+    );
+    let menu_text_node = Node {
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let menu_text = TextBundle {
-        text: Text::from_section(
-            "Main menu",
-            TextStyle {
-                color: Color::Srgba(WHITE),
-                ..Default::default()
-            },
-        ),
-        style: Style {
-            margin: UiRect::all(Val::Px(10.)),
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    commands
-        .spawn((screen_node, PauseMenu))
-        .with_children(|parent| {
+    let menu_text_bundle = (
+        Text::new("Main menu"),
+        TextColor(Color::Srgba(WHITE)),
+        // margin: UiRect::all(Val::Px(10.)),
+    );
+    commands.spawn(screen_node_bundle).with_children(|parent| {
+        parent.spawn(resume_button_bundle).with_children(|parent| {
             parent
-                .spawn((resume_button_node, ResumeButton))
-                .with_children(|parent: &mut bevy::prelude::ChildBuilder<'_>| {
-                    parent.spawn(resume_text);
-                });
-            parent
-                .spawn((menu_button_node, MenuButton))
-                .with_children(|parent| {
-                    parent.spawn(menu_text);
-                });
+                .spawn(resume_text_node)
+                .with_child(resume_text_bundle);
         });
+        parent.spawn(menu_button_bundle).with_children(|parent| {
+            parent.spawn(menu_text_node).with_child(menu_text_bundle);
+        });
+    });
 }
 
 pub fn despawn(mut commands: Commands, pause_menu_query: Query<Entity, With<PauseMenu>>) {

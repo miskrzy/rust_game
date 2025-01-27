@@ -14,7 +14,7 @@ use bevy::{
     input::ButtonInput,
     math::{Vec2, Vec3},
     prelude::{Commands, Entity, KeyCode, NextState, Query, Res, ResMut, Transform, Window, With},
-    sprite::{Sprite, SpriteBundle},
+    sprite::Sprite,
     time::{Time, Timer, TimerMode},
     window::PrimaryWindow,
 };
@@ -32,14 +32,8 @@ pub fn spawn(
 
     let texture = asset_server_resource.load(TEXTURE_PATH);
     let sprite = Sprite {
+        image: texture,
         custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
-        ..Default::default()
-    };
-
-    let sprite_bundle = SpriteBundle {
-        sprite: sprite,
-        transform: Transform::from_xyz(x_position, y_position, z_position),
-        texture: texture,
         ..Default::default()
     };
 
@@ -51,7 +45,14 @@ pub fn spawn(
 
     let score = Score { score: 0 };
 
-    commands.spawn((sprite_bundle, Player, health, projectile_cast_timer, score));
+    commands.spawn((
+        sprite,
+        Transform::from_xyz(x_position, y_position, z_position),
+        Player,
+        health,
+        projectile_cast_timer,
+        score,
+    ));
 }
 
 pub fn movement(
@@ -79,7 +80,7 @@ pub fn movement(
             .normalize_or_zero()
             .with_z(transform.translation.z);
 
-        transform.translation += direction * SPEED * time.delta_seconds();
+        transform.translation += direction * SPEED * time.delta_secs();
     }
 }
 
