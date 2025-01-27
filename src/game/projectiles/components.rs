@@ -33,3 +33,5 @@ impl Projectile {
         self.timer.finished()
     }
 }
+
+pub struct Explosion;
