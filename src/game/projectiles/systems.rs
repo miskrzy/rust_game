@@ -53,7 +53,7 @@ pub fn spawn(
                 let projectile = Projectile::new(start_position, target_position, SPEED);
 
                 let sprite = Sprite {
-                    image: asset_server.load(TEXTURE_PATH),
+                    image: asset_server.load(PROJECTILE_TEXTURE_PATH),
                     custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
                     ..Default::default()
                 };
