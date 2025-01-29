@@ -15,6 +15,8 @@ use super::{
     components::Projectile,
     constants::{PROJECTILE_TEXTURE_PATH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER},
 };
+use bevy::ecs::system::ResMut;
+use bevy::sprite::{TextureAtlas, TextureAtlasLayout};
 use bevy::{
     asset::{AssetServer, Assets},
     math::{
@@ -25,7 +27,6 @@ use bevy::{
     sprite::Sprite,
     time::Time,
 };
-use std::collections::HashSet;
 
 pub fn spawn(
     mut player_query: Query<(&mut CastTimer, &Transform), With<Player>>,
@@ -109,48 +110,33 @@ pub fn despawn(projectile_query: Query<Entity, With<Projectile>>, mut commands: 
     }
 }
 
-// pub fn spawn_explosion(
-//     asset_server: Res<AssetServer>,
-//     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-//     mut commands: Commands,
-// ) {
-//     // load the sprite sheet using the `AssetServer`
-//     let texture = asset_server.load(EXPLOSION_TEXTURE_PATH);
+pub fn spawn_explosion(
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut commands: Commands,
+) {
+    // load the sprite sheet using the `AssetServer`
+    let texture = asset_server.load(EXPLOSION_TEXTURE_PATH);
 
-//     // the sprite sheet has 7 sprites arranged in a row, and they are all 24px x 24px
-//     let layout = TextureAtlasLayout::from_grid(
-//         UVec2::splat(EXPLOSION_TEXTURE_SIZE),
-//         EXPLOSION_TEXTURE_COLUMNS,
-//         EXPLOSION_TEXTURE_ROWS,
-//         None,
-//         None,
-//     );
-//     let texture_atlas_layout = texture_atlas_layouts.add(layout);
+    let layout = TextureAtlasLayout::from_grid(
+        UVec2::splat(EXPLOSION_TEXTURE_SIZE),
+        EXPLOSION_TEXTURE_COLUMNS,
+        EXPLOSION_TEXTURE_ROWS,
+        None,
+        None,
+    );
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-//     let sprite = Sprite {
-
-//         custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
-//         ..Default::default()
-//     };
-
-//     let sprite_bundle = SpriteBundle {
-//         sprite: sprite,
-//         texture: asset_server.load(TEXTURE_PATH),
-//         transform: Transform::from_xyz(0., 0., 0.),
-//         ..Default::default()
-//     };
-
-//     commands.spawn((
-//         Sprite {
-//             image: texture.clone(),
-//             texture_atlas: Some(TextureAtlas {
-//                 layout: texture_atlas_layout.clone(),
-//                 index: animation_config_1.first_sprite_index,
-//             }),
-//             ..default()
-//         },
-//         Transform::from_scale(Vec3::splat(6.0)).with_translation(Vec3::new(-50.0, 0.0, 0.0)),
-//         LeftSprite,
-//         animation_config_1,
-//     ));
-// }
+    commands.spawn((
+        Sprite {
+            image: texture.clone(),
+            // custom_size: Some(Vec2::new(EXPLOSION_TEXTURE_SIZE, EXPLOSION_TEXTURE_SIZE)),
+            texture_atlas: Some(TextureAtlas {
+                layout: texture_atlas_layout.clone(),
+                index: 0,
+            }),
+            ..Default::default()
+        },
+        Transform::from_xyz(100., 100., 100.),
+    ));
+}
