@@ -79,9 +79,11 @@ pub fn hit_target(
     mut commands: Commands,
     mut player_query: Query<&mut Score, With<Player>>,
 ) {
-    let mut entities_to_despawn = HashSet::new();
     for (projectile, transform, entity) in projectile_query.iter() {
-        let mut entity_exists = true;
+        if projectile.is_finished() {
+            commands.entity(entity).despawn();
+            continue;
+        }
         for (enemy_transform, mut health) in enemy_query.iter_mut() {
             let projectile_collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
@@ -90,20 +92,14 @@ pub fn hit_target(
                 ENEMY_SPRITE_DIAMETER / 2.,
             );
             if projectile_collider.intersects(&enemy_collider) {
-                entities_to_despawn.insert(entity);
+                commands.entity(entity).despawn();
                 health.deal_damage(DAMAGE);
-                entity_exists = false;
                 if let Ok(mut score) = player_query.get_single_mut() {
                     score.score += 1;
                 }
+                break;
             }
         }
-        if projectile.is_finished() && entity_exists {
-            entities_to_despawn.insert(entity);
-        }
-    }
-    for entity in entities_to_despawn {
-        commands.entity(entity).despawn();
     }
 }
 
