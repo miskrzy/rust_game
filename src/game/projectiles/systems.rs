@@ -1,27 +1,19 @@
 use crate::game::player::components::Score;
 
-use super::constants::DAMAGE;
-use super::{
-    super::{
-        enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
-        player::components::{CastTimer, Health, Player},
-    },
-    constants::{
-        EXPLOSION_TEXTURE_COLUMNS, EXPLOSION_TEXTURE_PATH, EXPLOSION_TEXTURE_ROWS,
-        EXPLOSION_TEXTURE_SIZE,
-    },
+use super::super::{
+    enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
+    player::components::{CastTimer, Health, Player},
 };
+use super::constants::DAMAGE;
 use super::{
     components::Projectile,
     constants::{PROJECTILE_TEXTURE_PATH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER},
 };
-use bevy::ecs::system::ResMut;
-use bevy::sprite::{TextureAtlas, TextureAtlasLayout};
 use bevy::{
-    asset::{AssetServer, Assets},
+    asset::AssetServer,
     math::{
         bounding::{BoundingCircle, IntersectsVolume},
-        UVec2, Vec2, Vec3,
+        Vec2, Vec3,
     },
     prelude::{Commands, Entity, Query, Res, Transform, With, Without},
     sprite::Sprite,
@@ -108,35 +100,4 @@ pub fn despawn(projectile_query: Query<Entity, With<Projectile>>, mut commands: 
     for entity in projectile_query.iter() {
         commands.entity(entity).despawn();
     }
-}
-
-pub fn spawn_explosion(
-    asset_server: Res<AssetServer>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut commands: Commands,
-) {
-    // load the sprite sheet using the `AssetServer`
-    let texture = asset_server.load(EXPLOSION_TEXTURE_PATH);
-
-    let layout = TextureAtlasLayout::from_grid(
-        UVec2::splat(EXPLOSION_TEXTURE_SIZE),
-        EXPLOSION_TEXTURE_COLUMNS,
-        EXPLOSION_TEXTURE_ROWS,
-        None,
-        None,
-    );
-    let texture_atlas_layout = texture_atlas_layouts.add(layout);
-
-    commands.spawn((
-        Sprite {
-            image: texture.clone(),
-            // custom_size: Some(Vec2::new(EXPLOSION_TEXTURE_SIZE, EXPLOSION_TEXTURE_SIZE)),
-            texture_atlas: Some(TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: 0,
-            }),
-            ..Default::default()
-        },
-        Transform::from_xyz(100., 100., 100.),
-    ));
 }

@@ -3,6 +3,7 @@ use bevy::prelude::{App, AppExtStates, Plugin};
 mod arena;
 mod camera;
 mod enemies;
+mod explosion;
 mod hud;
 mod pause_menu;
 mod player;
@@ -12,6 +13,7 @@ pub mod states;
 use arena::ArenaPlugin;
 use camera::CameraPlugin;
 use enemies::EnemyPlugin;
+use explosion::ExplosionPlugin;
 use hud::HUDPlugin;
 use pause_menu::PauseMenuPlugin;
 use player::PlayerPlugin;
@@ -30,6 +32,7 @@ impl Plugin for GamePlugin {
             PauseMenuPlugin,
             ArenaPlugin,
             CameraPlugin,
+            ExplosionPlugin,
         ))
         .insert_state(GameState::None);
     }
