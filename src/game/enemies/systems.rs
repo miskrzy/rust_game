@@ -1,6 +1,6 @@
 use super::super::arena::constants::{HEIGHT as ARENA_HEIGHT, WIDTH as ARENA_WIDTH};
 use super::super::player::{
-    components::{Health, Player},
+    components::{Health, Player, Score},
     constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
 };
 use super::{
@@ -202,10 +202,17 @@ pub fn attack_player(
     }
 }
 
-pub fn despawn_dead(enemy_query: Query<(Entity, &Health), With<Enemy>>, mut commands: Commands) {
+pub fn despawn_dead(
+    enemy_query: Query<(Entity, &Health), With<Enemy>>,
+    mut player_query: Query<&mut Score, With<Player>>,
+    mut commands: Commands,
+) {
     for (entity, health) in enemy_query.iter() {
         if health.is_dead() {
-            commands.entity(entity).despawn()
+            commands.entity(entity).despawn();
+            if let Ok(mut score) = player_query.get_single_mut() {
+                score.score += 1;
+            }
         }
     }
 }

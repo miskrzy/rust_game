@@ -4,7 +4,7 @@ use bevy::{
 };
 use std::time::Duration;
 
-#[derive(Component)]
+#[derive(Clone, Component)]
 pub struct Explosion {
     timer: Timer,
     current_frame: usize,
@@ -41,9 +41,16 @@ impl Explosion {
         self.current_frame - 1
     }
 
+    pub fn hit(&self) -> bool {
+        self.timer.finished()
+    }
+
     pub fn finished(&self) -> bool {
         self.timer.finished()
             && self.current_repetition == self.total_repetition
             && self.current_frame == self.total_frames
     }
 }
+
+#[derive(Component)]
+pub struct ShouldExplode;

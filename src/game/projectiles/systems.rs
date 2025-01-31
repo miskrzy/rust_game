@@ -1,7 +1,6 @@
-use crate::game::player::components::Score;
-
 use super::super::{
     enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
+    explosion::components::ShouldExplode,
     player::components::{CastTimer, Health, Player},
 };
 use super::constants::DAMAGE;
@@ -68,16 +67,15 @@ pub fn movement(mut projectile_query: Query<(&mut Projectile, &mut Transform)>, 
 
 pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
-    mut enemy_query: Query<(&Transform, &mut Health), With<Enemy>>,
+    mut enemy_query: Query<(&Transform, &mut Health, Entity), With<Enemy>>,
     mut commands: Commands,
-    mut player_query: Query<&mut Score, With<Player>>,
 ) {
     for (projectile, transform, entity) in projectile_query.iter() {
         if projectile.is_finished() {
             commands.entity(entity).despawn();
             continue;
         }
-        for (enemy_transform, mut health) in enemy_query.iter_mut() {
+        for (enemy_transform, mut enemy_health, enemy_entity) in enemy_query.iter_mut() {
             let projectile_collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
             let enemy_collider = BoundingCircle::new(
@@ -86,9 +84,9 @@ pub fn hit_target(
             );
             if projectile_collider.intersects(&enemy_collider) {
                 commands.entity(entity).despawn();
-                health.deal_damage(DAMAGE);
-                if let Ok(mut score) = player_query.get_single_mut() {
-                    score.score += 1;
+                enemy_health.deal_damage(DAMAGE);
+                if !enemy_health.is_dead() {
+                    commands.entity(enemy_entity).insert(ShouldExplode);
                 }
                 break;
             }

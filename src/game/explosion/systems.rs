@@ -1,9 +1,15 @@
-use super::components::Explosion;
+use super::super::enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_DIAMETER};
+use super::super::player::components::Health;
+
+use super::components::{Explosion, ShouldExplode};
 use super::constants::{
-    DIAMETER, DURATION, REPEAT, TEXTURE_COLUMNS, TEXTURE_PATH, TEXTURE_ROWS, TEXTURE_SIZE,
+    DAMAGE, DIAMETER, DURATION, OPACITY, REPEAT, TEXTURE_COLUMNS, TEXTURE_PATH, TEXTURE_ROWS,
+    TEXTURE_SIZE,
 };
+use bevy::color::Alpha;
 use bevy::ecs::query::With;
 use bevy::ecs::system::ResMut;
+use bevy::math::bounding::{BoundingCircle, IntersectsVolume};
 use bevy::math::{UVec2, Vec2};
 use bevy::sprite::{TextureAtlas, TextureAtlasLayout};
 use bevy::time::Time;
@@ -17,8 +23,8 @@ pub fn spawn(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut commands: Commands,
+    query: Query<(Entity, &Transform), With<ShouldExplode>>,
 ) {
-    // load the sprite sheet using the `AssetServer`
     let texture = asset_server.load(TEXTURE_PATH);
 
     let layout = TextureAtlasLayout::from_grid(
@@ -30,33 +36,64 @@ pub fn spawn(
     );
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-    commands.spawn((
-        Sprite {
-            image: texture.clone(),
-            custom_size: Some(Vec2 {
-                x: DIAMETER,
-                y: DIAMETER,
-            }),
-            texture_atlas: Some(TextureAtlas {
-                layout: texture_atlas_layout.clone(),
-                index: 0,
-            }),
-            ..Default::default()
-        },
-        Transform::from_xyz(100., 100., 100.),
-        Explosion::new(
-            DURATION,
-            usize::try_from(TEXTURE_COLUMNS * TEXTURE_ROWS).unwrap(),
-            REPEAT,
-        ),
-    ));
+    let mut sprite = Sprite {
+        image: texture.clone(),
+        custom_size: Some(Vec2 {
+            x: DIAMETER,
+            y: DIAMETER,
+        }),
+        texture_atlas: Some(TextureAtlas {
+            layout: texture_atlas_layout.clone(),
+            index: 0,
+        }),
+        ..Default::default()
+    };
+    sprite.color.set_alpha(OPACITY);
+
+    let explosion = Explosion::new(
+        DURATION,
+        usize::try_from(TEXTURE_COLUMNS * TEXTURE_ROWS).unwrap(),
+        REPEAT,
+    );
+
+    for (enemy_entity, enemy_transform) in query.iter() {
+        commands.spawn((sprite.clone(), enemy_transform.clone(), explosion.clone()));
+        commands.entity(enemy_entity).remove::<ShouldExplode>();
+    }
 }
 
-pub fn animate(time: Res<Time>, mut explosion_query: Query<(&mut Sprite, &mut Explosion)>) {
-    for (mut sprite, mut explosion) in explosion_query.iter_mut() {
+pub fn step_explosion(time: Res<Time>, mut explosion_query: Query<&mut Explosion>) {
+    for mut explosion in explosion_query.iter_mut() {
         explosion.step(time.delta());
+    }
+}
+
+pub fn animate(mut explosion_query: Query<(&mut Sprite, &Explosion)>) {
+    for (mut sprite, explosion) in explosion_query.iter_mut() {
         if let Some(texture_atlas) = &mut sprite.texture_atlas {
             texture_atlas.index = explosion.current_frame()
+        }
+    }
+}
+
+pub fn hit_targets(
+    explosion_query: Query<(&Explosion, &Transform)>,
+    mut enemy_query: Query<(&mut Health, &Transform), With<Enemy>>,
+) {
+    for (explosion, transform) in explosion_query.iter() {
+        if explosion.hit() {
+            for (mut enemy_health, enemy_transform) in enemy_query.iter_mut() {
+                let explosion_collider =
+                    BoundingCircle::new(transform.translation.truncate(), DIAMETER / 2.);
+                let enemy_collider = BoundingCircle::new(
+                    enemy_transform.translation.truncate(),
+                    ENEMY_DIAMETER / 2.,
+                );
+
+                if explosion_collider.intersects(&enemy_collider) {
+                    enemy_health.deal_damage(DAMAGE);
+                }
+            }
         }
     }
 }
