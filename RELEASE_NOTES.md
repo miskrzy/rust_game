@@ -7,13 +7,14 @@
  - player can move with wasd or arrows
  - projectiles shoot automatically towards closest enemy (no homing)
  - player health regenerates
- - player death spawns a game over screen
+ - player death spawns a game over 
+ - **projectiles spawn animated explosion on impact**
 3. Pause Menu:
  - can pause unpause with esc
  - can resume or exit to main menu
-5. **Arena**
- - **arena is now larger than the screen**
- - **camera follows the player but only within the area of the arena**
+5. Arena
+ - arena is now larger than the screen
+ - camera follows the player but only within the area of the arena
 6. GUI:
  - score
  - health bar
