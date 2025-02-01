@@ -7,6 +7,7 @@ use super::constants::{
     TEXTURE_SIZE,
 };
 use super::events::Explode;
+use super::resources::AssetHandles;
 use bevy::color::Alpha;
 use bevy::ecs::event::EventReader;
 use bevy::ecs::query::With;
@@ -21,14 +22,16 @@ use bevy::{
     sprite::Sprite,
 };
 
+pub fn startup(mut asset_handles: ResMut<AssetHandles>, asset_server: Res<AssetServer>) {
+    asset_handles.texture = asset_server.load(TEXTURE_PATH);
+}
+
 pub fn spawn(
-    asset_server: Res<AssetServer>,
+    asset_handles: Res<AssetHandles>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut commands: Commands,
     mut explode_events: EventReader<Explode>,
 ) {
-    let texture = asset_server.load(TEXTURE_PATH);
-
     let layout = TextureAtlasLayout::from_grid(
         UVec2::splat(TEXTURE_SIZE),
         TEXTURE_COLUMNS,
@@ -39,13 +42,13 @@ pub fn spawn(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let mut sprite = Sprite {
-        image: texture.clone(),
+        image: asset_handles.texture.clone(),
         custom_size: Some(Vec2 {
             x: DIAMETER,
             y: DIAMETER,
         }),
         texture_atlas: Some(TextureAtlas {
-            layout: texture_atlas_layout.clone(),
+            layout: texture_atlas_layout,
             index: 0,
         }),
         ..Default::default()

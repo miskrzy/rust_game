@@ -5,6 +5,7 @@ use super::super::arena::constants::{HEIGHT as ARENA_HEIGHT, WIDTH as ARENA_WIDT
 use super::super::projectiles::constants::CAST_SPEED;
 use super::components::Score;
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::resources::AssetHandles;
 use super::{
     components::{CastTimer, Health, Player},
     constants::HEALTH_REGEN,
@@ -20,19 +21,22 @@ use bevy::{
 };
 use std::time::Duration;
 
+pub fn startup(mut asset_handles: ResMut<AssetHandles>, asset_server: Res<AssetServer>) {
+    asset_handles.texture = asset_server.load(TEXTURE_PATH);
+}
+
 pub fn spawn(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server_resource: Res<AssetServer>,
+    asset_handles: Res<AssetHandles>,
 ) {
     let window = window_query.get_single().unwrap();
     let x_position = window.width() / 2.;
     let y_position = window.height() / 2.;
     let z_position: f32 = SPRITE_DEPTH;
 
-    let texture = asset_server_resource.load(TEXTURE_PATH);
-    let sprite = Sprite {
-        image: texture,
+    let sprite: Sprite = Sprite {
+        image: asset_handles.texture.clone(),
         custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
         ..Default::default()
     };
