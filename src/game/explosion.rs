@@ -1,17 +1,19 @@
 use bevy::{
     app::Update,
     ecs::schedule::IntoSystemConfigs,
-    prelude::{App, Plugin},
+    prelude::{App, Plugin, Startup},
     state::{condition::in_state, state::OnExit},
 };
 
 mod components;
 pub mod constants;
 pub mod events;
+mod resources;
 pub mod systems;
 
 use events::Explode;
-use systems::{animate, despawn, despawn_on_finish, hit_targets, spawn, step_explosion};
+use resources::AssetHandles;
+use systems::{animate, despawn, despawn_on_finish, hit_targets, spawn, startup, step_explosion};
 
 use crate::states::AppState;
 
@@ -22,6 +24,8 @@ pub struct ExplosionPlugin;
 impl Plugin for ExplosionPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<Explode>()
+            .init_resource::<AssetHandles>()
+            .add_systems(Startup, startup)
             .add_systems(OnExit(AppState::Game), despawn)
             .add_systems(
                 Update,

@@ -3,6 +3,7 @@ use super::super::player::{
     components::{Health, Player, Score},
     constants::SPRITE_DIAMETER as PLAYER_SPRITE_DIAMETER,
 };
+use super::resources::AssetHandles;
 use super::{
     components::{AttackTimer, Enemy},
     constants::{
@@ -17,13 +18,17 @@ use bevy::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
     },
-    prelude::{Commands, Entity, Query, Res, ResMut, Transform, With, Without},
+    prelude::{Commands, Entity, Handle, Image, Query, Res, ResMut, Transform, With, Without},
     sprite::Sprite,
     time::{Time, Timer, TimerMode},
     window::{PrimaryWindow, Window},
 };
 use rand::{thread_rng, Rng};
 use std::time::Duration;
+
+pub fn startup(mut asset_handles: ResMut<AssetHandles>, asset_server: Res<AssetServer>) {
+    asset_handles.texture = asset_server.load(TEXTURE_PATH);
+}
 
 fn create_random_position(
     screen_l: f32,
@@ -57,7 +62,7 @@ fn create_random_position(
 
 fn create_entity_bundle(
     window_query: &Query<&Window, With<PrimaryWindow>>,
-    asset_server: &Res<AssetServer>,
+    texture: &Handle<Image>,
     player_query: &Query<&Transform, With<Player>>,
 ) -> (Sprite, Transform, Enemy, AttackTimer, Health) {
     let window = window_query.get_single().unwrap();
@@ -85,11 +90,9 @@ fn create_entity_bundle(
         SPRITE_DIAMETER / 2.,
     );
 
-    let texture = asset_server.load(TEXTURE_PATH);
-
     let sprite = Sprite {
         custom_size: Some(Vec2::new(SPRITE_DIAMETER, SPRITE_DIAMETER)),
-        image: texture,
+        image: texture.clone(),
         ..Default::default()
     };
 
@@ -109,13 +112,13 @@ fn create_entity_bundle(
 pub fn initial_spawn(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>,
+    asset_handles: Res<AssetHandles>,
     player_query: Query<&Transform, With<Player>>,
 ) {
     for _ in 0..INITIAL_AMOUNT {
         commands.spawn(create_entity_bundle(
             &window_query,
-            &asset_server,
+            &asset_handles.texture,
             &player_query,
         ));
     }
@@ -124,7 +127,7 @@ pub fn initial_spawn(
 pub fn spawn_over_time(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>,
+    asset_handles: Res<AssetHandles>,
     mut spawn_timer: ResMut<SpawnTimer>,
     time: Res<Time>,
     player_query: Query<&Transform, With<Player>>,
@@ -133,7 +136,7 @@ pub fn spawn_over_time(
     if spawn_timer.timer.finished() {
         commands.spawn(create_entity_bundle(
             &window_query,
-            &asset_server,
+            &asset_handles.texture,
             &player_query,
         ));
     }

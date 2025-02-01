@@ -1,10 +1,12 @@
-use bevy::prelude::{in_state, App, IntoSystemConfigs, OnExit, Plugin, Update};
+use bevy::prelude::{in_state, App, IntoSystemConfigs, OnExit, Plugin, Startup, Update};
 
 mod components;
 pub mod constants;
+mod resources;
 mod systems;
 
-use systems::{despawn, hit_target, movement, spawn};
+use resources::AssetHandles;
+use systems::{despawn, hit_target, movement, spawn, startup};
 
 use super::states::GameState;
 use crate::states::AppState;
@@ -13,10 +15,12 @@ pub struct ProjectilePlugin;
 
 impl Plugin for ProjectilePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (spawn, movement, hit_target).run_if(in_state(GameState::Play)),
-        )
-        .add_systems(OnExit(AppState::Game), despawn);
+        app.init_resource::<AssetHandles>()
+            .add_systems(Startup, startup)
+            .add_systems(
+                Update,
+                (spawn, movement, hit_target).run_if(in_state(GameState::Play)),
+            )
+            .add_systems(OnExit(AppState::Game), despawn);
     }
 }
