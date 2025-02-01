@@ -3,6 +3,7 @@ use bevy::{
         palettes::css::{BLACK, GRAY, WHITE},
         Color,
     },
+    ecs::event::EventReader,
     prelude::{
         BuildChildren, Button, Changed, ChildBuild, Commands, DespawnRecursiveExt, Entity,
         NextState, Node, Query, ResMut, Text, With,
@@ -18,10 +19,17 @@ use super::{
     components::{GameOverMenu, MenuButton, RestartButton},
     constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR},
 };
+use crate::game::player::events::FinalScore;
 use crate::states::AppState;
 use crate::{game::states::GameState, main_menu::states::MainMenuState};
 
-pub fn spawn(mut commands: Commands) {
+pub fn spawn(mut commands: Commands, mut final_score_events: EventReader<FinalScore>) {
+    let final_score = if let Some(final_score) = final_score_events.read().last() {
+        final_score.score.to_string()
+    } else {
+        "N/A".to_string()
+    };
+
     let screen_node_bundle = (
         Node {
             display: Display::Flex,
@@ -40,13 +48,14 @@ pub fn spawn(mut commands: Commands) {
         display: Display::Flex,
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let game_over_text_bundle = (
-        Text::new("GAME OVER"),
+    let game_over_text_bundle = (Text::new("GAME OVER"), TextColor(Color::Srgba(WHITE)));
+    let final_score_text_bundle = (
+        Text::new(format!("Final score: {}", final_score)),
         TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
     );
     let restart_button_bundle = (
         Node {
@@ -70,11 +79,7 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let restart_text_bundle = (
-        Text::new("Restart"),
-        TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
-    );
+    let restart_text_bundle = (Text::new("Restart"), TextColor(Color::Srgba(WHITE)));
     let menu_button_bundle = (
         Node {
             display: Display::Flex,
@@ -97,15 +102,12 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let menu_text_bundle = (
-        Text::new("Main menu"),
-        TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
-    );
+    let menu_text_bundle = (Text::new("Main menu"), TextColor(Color::Srgba(WHITE)));
     commands.spawn(screen_node_bundle).with_children(|parent| {
-        parent
-            .spawn(game_over_text_node)
-            .with_child(game_over_text_bundle);
+        parent.spawn(game_over_text_node).with_children(|parent| {
+            parent.spawn(game_over_text_bundle);
+            parent.spawn(final_score_text_bundle);
+        });
         parent.spawn(restart_button_bundle).with_children(|parent| {
             parent
                 .spawn(restart_text_node)

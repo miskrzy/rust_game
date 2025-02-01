@@ -59,11 +59,7 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let start_text_bundle = (
-        Text::new("Start Game"),
-        TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
-    );
+    let start_text_bundle = (Text::new("Start Game"), TextColor(Color::Srgba(WHITE)));
     let quit_button_bundle = (
         Node {
             display: Display::Flex,
@@ -86,11 +82,7 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let quit_text_bundle = (
-        Text::new("Quit Game"),
-        TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
-    );
+    let quit_text_bundle = (Text::new("Quit Game"), TextColor(Color::Srgba(WHITE)));
     let controls_button_bundle = (
         Node {
             display: Display::Flex,
@@ -113,11 +105,7 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let controls_text_bundle = (
-        Text::new("Controls"),
-        TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
-    );
+    let controls_text_bundle = (Text::new("Controls"), TextColor(Color::Srgba(WHITE)));
     commands.spawn(screen_bundle).with_children(|parent| {
         parent.spawn(start_button_bundle).with_children(|parent| {
             parent.spawn(start_text_node).with_child(start_text_bundle);

@@ -2,10 +2,12 @@ use bevy::{
     app::Update,
     prelude::{in_state, App, IntoSystemConfigs, OnEnter, OnExit, Plugin, Startup},
 };
+use events::FinalScore;
 use resources::AssetHandles;
 
 pub mod components;
 pub mod constants;
+pub mod events;
 mod resources;
 mod systems;
 
@@ -17,7 +19,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<AssetHandles>()
+        app.add_event::<FinalScore>()
+            .init_resource::<AssetHandles>()
             .add_systems(Startup, startup)
             .add_systems(OnEnter(AppState::Game), spawn)
             .add_systems(

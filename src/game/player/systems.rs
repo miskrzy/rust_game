@@ -5,11 +5,13 @@ use super::super::arena::constants::{HEIGHT as ARENA_HEIGHT, WIDTH as ARENA_WIDT
 use super::super::projectiles::constants::CAST_SPEED;
 use super::components::Score;
 use super::constants::{INITIAL_HEALTH, SPEED, SPRITE_DEPTH, SPRITE_DIAMETER, TEXTURE_PATH};
+use super::events::FinalScore;
 use super::resources::AssetHandles;
 use super::{
     components::{CastTimer, Health, Player},
     constants::HEALTH_REGEN,
 };
+use bevy::ecs::event::EventWriter;
 use bevy::{
     asset::AssetServer,
     input::ButtonInput,
@@ -111,15 +113,17 @@ pub fn restrict_movement(
 }
 
 pub fn check_dead(
-    player_query: Query<&Health, With<Player>>,
+    player_query: Query<(&Health, &Score), With<Player>>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut final_score_events: EventWriter<FinalScore>,
 ) {
-    if let Ok(health) = player_query.get_single() {
+    if let Ok((health, score)) = player_query.get_single() {
+        println!("check death");
         if health.is_dead() {
-            println!("Player is dead");
+            final_score_events.send(FinalScore { score: score.score });
             next_game_state.set(GameState::None);
-            next_app_state.set(AppState::GameOver)
+            next_app_state.set(AppState::GameOver);
         }
     }
 }
