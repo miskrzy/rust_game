@@ -51,6 +51,3 @@ impl Explosion {
             && self.current_frame == self.total_frames
     }
 }
-
-#[derive(Component)]
-pub struct ShouldExplode;

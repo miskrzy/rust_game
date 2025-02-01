@@ -5,10 +5,12 @@ use bevy::{
     state::{condition::in_state, state::OnExit},
 };
 
-pub mod components;
+mod components;
 pub mod constants;
-mod systems;
+pub mod events;
+pub mod systems;
 
+use events::Explode;
 use systems::{animate, despawn, despawn_on_finish, hit_targets, spawn, step_explosion};
 
 use crate::states::AppState;
@@ -19,7 +21,8 @@ pub struct ExplosionPlugin;
 
 impl Plugin for ExplosionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(AppState::Game), despawn)
+        app.add_event::<Explode>()
+            .add_systems(OnExit(AppState::Game), despawn)
             .add_systems(
                 Update,
                 (

@@ -1,6 +1,6 @@
 use super::super::{
     enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_SPRITE_DIAMETER},
-    explosion::components::ShouldExplode,
+    explosion::events::Explode,
     player::components::{CastTimer, Health, Player},
 };
 use super::constants::DAMAGE;
@@ -10,6 +10,7 @@ use super::{
 };
 use bevy::{
     asset::AssetServer,
+    ecs::event::EventWriter,
     math::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
@@ -67,7 +68,8 @@ pub fn movement(mut projectile_query: Query<(&mut Projectile, &mut Transform)>, 
 
 pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
-    mut enemy_query: Query<(&Transform, &mut Health, Entity), With<Enemy>>,
+    mut enemy_query: Query<(&Transform, &mut Health), With<Enemy>>,
+    mut explode_events: EventWriter<Explode>,
     mut commands: Commands,
 ) {
     for (projectile, transform, entity) in projectile_query.iter() {
@@ -75,7 +77,7 @@ pub fn hit_target(
             commands.entity(entity).despawn();
             continue;
         }
-        for (enemy_transform, mut enemy_health, enemy_entity) in enemy_query.iter_mut() {
+        for (enemy_transform, mut enemy_health) in enemy_query.iter_mut() {
             let projectile_collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
             let enemy_collider = BoundingCircle::new(
@@ -85,9 +87,9 @@ pub fn hit_target(
             if projectile_collider.intersects(&enemy_collider) {
                 commands.entity(entity).despawn();
                 enemy_health.deal_damage(DAMAGE);
-                if !enemy_health.is_dead() {
-                    commands.entity(enemy_entity).insert(ShouldExplode);
-                }
+                explode_events.send(Explode {
+                    transform: enemy_transform.clone(),
+                });
                 break;
             }
         }

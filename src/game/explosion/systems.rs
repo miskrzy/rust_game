@@ -1,12 +1,14 @@
 use super::super::enemies::{components::Enemy, constants::SPRITE_DIAMETER as ENEMY_DIAMETER};
 use super::super::player::components::Health;
 
-use super::components::{Explosion, ShouldExplode};
+use super::components::Explosion;
 use super::constants::{
     DAMAGE, DIAMETER, DURATION, OPACITY, REPEAT, TEXTURE_COLUMNS, TEXTURE_PATH, TEXTURE_ROWS,
     TEXTURE_SIZE,
 };
+use super::events::Explode;
 use bevy::color::Alpha;
+use bevy::ecs::event::EventReader;
 use bevy::ecs::query::With;
 use bevy::ecs::system::ResMut;
 use bevy::math::bounding::{BoundingCircle, IntersectsVolume};
@@ -23,7 +25,7 @@ pub fn spawn(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut commands: Commands,
-    query: Query<(Entity, &Transform), With<ShouldExplode>>,
+    mut explode_events: EventReader<Explode>,
 ) {
     let texture = asset_server.load(TEXTURE_PATH);
 
@@ -56,9 +58,8 @@ pub fn spawn(
         REPEAT,
     );
 
-    for (enemy_entity, enemy_transform) in query.iter() {
-        commands.spawn((sprite.clone(), enemy_transform.clone(), explosion.clone()));
-        commands.entity(enemy_entity).remove::<ShouldExplode>();
+    for explode_event in explode_events.read() {
+        commands.spawn((sprite.clone(), explode_event.transform, explosion.clone()));
     }
 }
 

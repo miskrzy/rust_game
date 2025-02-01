@@ -4,4 +4,4 @@ pub const PROJECTILE_TEXTURE_PATH: &str = "BlackCircle50x50.png";
 pub const SPRITE_DIAMETER: f32 = 10.;
 pub const SPRITE_DEPTH: f32 = 30.;
 pub const DURATION: f32 = 2.;
-pub const DAMAGE: f32 = 0.;
+pub const DAMAGE: f32 = 100.;
