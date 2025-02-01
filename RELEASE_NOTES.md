@@ -18,6 +18,8 @@
 6. GUI:
  - score
  - health bar
+7. Game over screen
+ - **game over screen shows final score**
 ## Others
 1. Release:
  - a github actions pipeline for building and creating a release

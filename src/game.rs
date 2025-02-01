@@ -6,7 +6,7 @@ mod enemies;
 mod explosion;
 mod hud;
 mod pause_menu;
-mod player;
+pub mod player;
 mod projectiles;
 pub mod states;
 

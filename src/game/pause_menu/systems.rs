@@ -64,7 +64,7 @@ pub fn spawn(mut commands: Commands) {
     let resume_text_bundle = (
         Text::new("Resume"),
         TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
+        
     );
     let menu_button_bundle = (
         Node {
@@ -91,7 +91,7 @@ pub fn spawn(mut commands: Commands) {
     let menu_text_bundle = (
         Text::new("Main menu"),
         TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
+        
     );
     commands.spawn(screen_node_bundle).with_children(|parent| {
         parent.spawn(resume_button_bundle).with_children(|parent| {

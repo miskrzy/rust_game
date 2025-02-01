@@ -95,7 +95,7 @@ pub fn spawn(mut commands: Commands) {
     let return_text_bundle = (
         Text::new("Return"),
         TextColor(Color::Srgba(WHITE)),
-        // margin: UiRect::all(Val::Px(10.)),
+        
     );
 
     let mut row_nodes = Vec::new();
