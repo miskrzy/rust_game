@@ -3,8 +3,8 @@ name: Rust Build and Release
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      # - main
+      - feature/azure_infra_setup_for_leaderboard
 
 permissions:
   contents: write
