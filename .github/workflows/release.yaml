@@ -37,11 +37,21 @@ jobs:
       run: |
         cargo  build
 
+    # - name: Create ZIP
+    #   shell: pwsh
+    #   run: |
+    #     $compress = @{
+    #       Path = "./target/release/game.exe", "./assets"
+    #       CompressionLevel = "Fastest"
+    #       DestinationPath = "./target/release/my_release.zip"
+    #     }
+    #     Compress-Archive @compress
+
     - name: Create ZIP
       shell: pwsh
       run: |
         $compress = @{
-          Path = "./target/release/game.exe", "./assets"
+          Path = "./target/debug/game.exe", "./assets"
           CompressionLevel = "Fastest"
           DestinationPath = "./target/release/my_release.zip"
         }
