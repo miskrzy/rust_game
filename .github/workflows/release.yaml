@@ -45,9 +45,9 @@ jobs:
       shell: pwsh
       run: |
         $compress = @{
-          Path = "./target/debug/game.exe", "./assets"
+          Path = "./target/release/game.exe", "./assets"
           CompressionLevel = "Fastest"
-          DestinationPath = "./target/debug/my_release.zip"
+          DestinationPath = "./target/release/my_release.zip"
         }
         Compress-Archive @compress
 
