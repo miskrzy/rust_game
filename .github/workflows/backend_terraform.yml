@@ -2,10 +2,10 @@ name: Terraform Plan and Apply for backend
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     # - main
-  #     - feature/azure_infra_setup_for_leaderboard
+  push:
+    branches:
+      # - main
+      - feature/azure_infra_setup_for_leaderboard
 
 permissions:
   contents: read
