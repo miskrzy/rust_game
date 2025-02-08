@@ -60,6 +60,7 @@ jobs:
           path: ./backend/infra/terraform/
 
   terraform_apply:
+    needs: terraform_plan
     runs-on: windows-latest
     defaults:
       run:
