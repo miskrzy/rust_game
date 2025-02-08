@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  plan:
+  terraform_plan:
     runs-on: windows-latest
     defaults:
       run:
@@ -53,7 +53,35 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: tfplan
-          path: ./backend/infra/terraform/tfplan
+          name: terraform_plan
+          path: ./backend/infra/terraform/
+
+  terraform_apply:
+    runs-on: windows-latest
+    defaults:
+      run:
+        # working-directory: ./backend/infra/terraform
+        shell: bash
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform_plan
+          # path: ./
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+    
+      - name: Terraform init
+        run: terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
