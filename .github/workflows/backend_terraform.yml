@@ -63,6 +63,7 @@ jobs:
   terraform_apply:
     needs: terraform_plan
     runs-on: windows-latest
+    environment: azure_backend
     defaults:
       run:
         shell: bash
