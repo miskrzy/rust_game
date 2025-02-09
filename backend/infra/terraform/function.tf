@@ -21,7 +21,7 @@ resource "azurerm_function_app" "this" {
   os_type                    = "linux"
   version                    = "~4"
 
-  app_settings {
+  app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
   }
 }
