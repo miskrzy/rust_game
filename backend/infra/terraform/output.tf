@@ -1,3 +1,3 @@
 output "name" {
-  value = "bevy_game"
+  value = "bevy_game_tests"
 }
