@@ -12,9 +12,9 @@ resource "azurerm_linux_function_app" "example" {
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
 
-  storage_account_name       = azurerm_storage_account.this.name
+  storage_account_name          = azurerm_storage_account.this.name
   storage_uses_managed_identity = true
-  service_plan_id            = azurerm_service_plan.this.id
+  service_plan_id               = azurerm_service_plan.this.id
 
   site_config {}
 
