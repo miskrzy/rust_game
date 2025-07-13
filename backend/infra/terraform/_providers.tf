@@ -5,4 +5,5 @@ provider "azurerm" {
   # ARM_SUBSCRIPTION_ID
   # ARM_TENANT_ID
   features {}
+  storage_use_azuread = true
 }
