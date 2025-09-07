@@ -12,12 +12,12 @@ resource "azurerm_linux_function_app" "this" {
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
 
-  storage_account_name          = azurerm_storage_account.this.name
-  storage_uses_managed_identity = true
-  service_plan_id               = azurerm_service_plan.this.id
+  storage_account_name       = azurerm_storage_account.this.name
+  storage_account_access_key = azurerm_storage_account.this.primary_access_key
+  service_plan_id            = azurerm_service_plan.this.id
 
-  https_only = true
-  # zip_deploy_file = data.archive_file.this.output_path
+  https_only      = true
+  zip_deploy_file = data.archive_file.this.output_path
 
   site_config {
     application_insights_connection_string = azurerm_application_insights.this.connection_string
@@ -25,9 +25,5 @@ resource "azurerm_linux_function_app" "this" {
 
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
-  }
-
-  identity {
-    type = "SystemAssigned"
   }
 }
