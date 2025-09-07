@@ -19,7 +19,9 @@ resource "azurerm_linux_function_app" "this" {
   https_only = true
   # zip_deploy_file = data.archive_file.this.output_path
 
-  site_config {}
+  site_config {
+    application_insights_connection_string = azurerm_application_insights.this.connection_string
+  }
 
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
