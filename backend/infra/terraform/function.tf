@@ -16,8 +16,8 @@ resource "azurerm_linux_function_app" "this" {
   storage_uses_managed_identity = true
   service_plan_id               = azurerm_service_plan.this.id
 
-  https_only      = true
-  zip_deploy_file = data.archive_file.this.output_path
+  https_only = true
+  # zip_deploy_file = data.archive_file.this.output_path
 
   site_config {}
 

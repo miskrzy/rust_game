@@ -6,6 +6,8 @@ on:
     branches:
       # - main
       - feature/azure_infra_setup_for_leaderboard
+    paths:
+      - 'backend/**'
 
 permissions:
   contents: read
