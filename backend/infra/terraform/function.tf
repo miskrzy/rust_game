@@ -7,7 +7,7 @@ resource "azurerm_service_plan" "this" {
 }
 
 
-resource "azurerm_linux_function_app" "example" {
+resource "azurerm_linux_function_app" "this" {
   name                = format("%s-function", local.prefix)
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
@@ -15,6 +15,9 @@ resource "azurerm_linux_function_app" "example" {
   storage_account_name          = azurerm_storage_account.this.name
   storage_uses_managed_identity = true
   service_plan_id               = azurerm_service_plan.this.id
+
+  https_only      = true
+  zip_deploy_file = data.archive_file.this.output_path
 
   site_config {}
 
