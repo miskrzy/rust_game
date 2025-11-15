@@ -1,7 +1,6 @@
 name: Terraform Plan and Apply for backend
 
 on:
-  workflow_dispatch:
   push:
     branches:
       # - main
