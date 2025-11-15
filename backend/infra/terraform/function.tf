@@ -27,3 +27,4 @@ resource "azurerm_linux_function_app" "this" {
     FUNCTIONS_WORKER_RUNTIME = "python"
   }
 }
+
