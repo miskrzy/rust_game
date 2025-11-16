@@ -18,13 +18,14 @@
 
 name: Deploy azure functions
 
-on: workflow_dispatch
-  # push:
-  #   branches:
-  #     # - main
-  #     - feature/azure_infra_setup_for_leaderboard
-  #   paths:
-  #     - 'backend/functions/**'
+on:
+  push:
+    branches:
+      # - main
+      - feature/azure_infra_setup_for_leaderboard
+    paths:
+      - 'backend/functions/**'
+      - '.github/workflows/function_deploy.yml'
 
 
 jobs:
