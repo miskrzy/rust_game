@@ -20,7 +20,7 @@ resource "azurerm_function_app_flex_consumption" "this" {
   storage_access_key          = azurerm_storage_account.this.primary_access_key
   runtime_name                = "python"
   runtime_version             = "3.12"
-  instance_memory_in_mb       = 512ś
+  instance_memory_in_mb       = 512
 
   app_settings = {
     application_insights_connection_string = azurerm_application_insights.this.connection_string
@@ -37,8 +37,8 @@ resource "time_sleep" "wait_for_function_app" {
 
 
 resource "azurerm_function_app_deployment" "this" {
-  depends_on              = [time_sleep.wait_for_function_app]
-  function_app_id         = azurerm_function_app_flex_consumption.this.id
-  filename                = data.archive_file.this.output_path
-  build_remote            = false
+  depends_on      = [time_sleep.wait_for_function_app]
+  function_app_id = azurerm_function_app_flex_consumption.this.id
+  filename        = data.archive_file.this.output_path
+  build_remote    = false
 }
