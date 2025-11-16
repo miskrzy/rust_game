@@ -6,7 +6,7 @@ on:
       # - main
       - feature/azure_infra_setup_for_leaderboard
     paths:
-      - 'backend/**'
+      - 'backend/infra/terraform/**'
 
 permissions:
   contents: read

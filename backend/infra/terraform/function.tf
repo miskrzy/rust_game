@@ -29,16 +29,3 @@ resource "azurerm_function_app_flex_consumption" "this" {
   site_config {}
 }
 
-
-# resource "time_sleep" "wait_for_function_app" {
-#   depends_on      = [azurerm_function_app_flex_consumption.this]
-#   create_duration = "30s"
-# }
-
-
-# resource "azurerm_function_app_deployment" "this" {
-#   depends_on      = [time_sleep.wait_for_function_app]
-#   function_app_id = azurerm_function_app_flex_consumption.this.id
-#   filename        = data.archive_file.this.output_path
-#   build_remote    = false
-# }
