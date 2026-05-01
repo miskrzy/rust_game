@@ -3,7 +3,6 @@ use super::components::{ControlsButton, MainMenu, QuitButton, StartButton};
 use super::constants::{BUTTON_COLOR, BUTTON_HOVERED_COLOR};
 use crate::game::states::GameState;
 use crate::states::AppState;
-use bevy::prelude::ChildBuild;
 use bevy::text::TextColor;
 use bevy::{
     app::AppExit,
@@ -13,8 +12,8 @@ use bevy::{
     },
     input::ButtonInput,
     prelude::{
-        BuildChildren, Button, Changed, Commands, DespawnRecursiveExt, Entity, EventWriter,
-        KeyCode, NextState, Node, Query, Res, ResMut, Text, With,
+        Button, Changed, Commands, Entity, KeyCode, MessageWriter, NextState, Node, Query, Res,
+        ResMut, Text, With,
     },
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
@@ -44,11 +43,11 @@ pub fn spawn(mut commands: Commands) {
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::all(Val::Px(10.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         Button,
         StartButton,
     );
@@ -67,12 +66,12 @@ pub fn spawn(mut commands: Commands) {
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::vertical(Val::Px(10.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         Button,
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         QuitButton,
     );
     let quit_text_node = Node {
@@ -90,11 +89,11 @@ pub fn spawn(mut commands: Commands) {
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::vertical(Val::Px(10.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         Button,
         ControlsButton,
     );
@@ -124,8 +123,8 @@ pub fn spawn(mut commands: Commands) {
 }
 
 pub fn despawn(mut commands: Commands, main_menu_query: Query<Entity, With<MainMenu>>) {
-    if let Ok(entity) = main_menu_query.get_single() {
-        commands.entity(entity).despawn_recursive();
+    if let Ok(entity) = main_menu_query.single() {
+        commands.entity(entity).despawn();
     }
 }
 
@@ -138,7 +137,7 @@ pub fn start_button_interaction(
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_app_state.set(AppState::Game);
@@ -160,12 +159,12 @@ pub fn quit_button_interaction(
         (&Interaction, &mut BackgroundColor),
         (With<QuitButton>, Changed<Interaction>),
     >,
-    mut exit: EventWriter<AppExit>,
+    mut exit: MessageWriter<AppExit>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
-                exit.send(AppExit::Success);
+                exit.write(AppExit::Success);
             }
             Interaction::Hovered => {
                 background_color.0 = BUTTON_HOVERED_COLOR;
@@ -184,7 +183,7 @@ pub fn controls_button_interaction(
     >,
     mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_main_menu_state.set(MainMenuState::Controls);
@@ -199,8 +198,8 @@ pub fn controls_button_interaction(
     }
 }
 
-pub fn esc_quit_game(keyboard_input: Res<ButtonInput<KeyCode>>, mut exit: EventWriter<AppExit>) {
+pub fn esc_quit_game(keyboard_input: Res<ButtonInput<KeyCode>>, mut exit: MessageWriter<AppExit>) {
     if keyboard_input.pressed(KeyCode::Escape) {
-        exit.send(AppExit::Success);
+        exit.write(AppExit::Success);
     }
 }

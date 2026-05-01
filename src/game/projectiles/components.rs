@@ -29,7 +29,7 @@ impl Projectile {
         self.direction * self.speed * time_delta.as_secs_f32()
     }
 
-    pub fn is_finished(&self) -> bool {
-        self.timer.finished()
+    pub fn is_finish(&self) -> bool {
+        self.timer.is_finished()
     }
 }

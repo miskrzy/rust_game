@@ -6,10 +6,7 @@ use bevy::{
         },
         Color,
     },
-    prelude::{
-        BuildChildren, Button, Changed, ChildBuild, Commands, DespawnRecursiveExt, Entity,
-        NextState, Node, Query, ResMut, Text, With,
-    },
+    prelude::{Button, Changed, Commands, Entity, NextState, Node, Query, ResMut, Text, With},
     text::TextColor,
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
@@ -76,11 +73,11 @@ pub fn spawn(mut commands: Commands) {
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::vertical(Val::Px(2.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         Button,
         ReturnButton,
     );
@@ -92,11 +89,7 @@ pub fn spawn(mut commands: Commands) {
         margin: UiRect::all(Val::Px(10.)),
         ..Default::default()
     };
-    let return_text_bundle = (
-        Text::new("Return"),
-        TextColor(Color::Srgba(WHITE)),
-        
-    );
+    let return_text_bundle = (Text::new("Return"), TextColor(Color::Srgba(WHITE)));
 
     let mut row_nodes = Vec::new();
     for (description, key) in CONTROLS {
@@ -108,9 +101,9 @@ pub fn spawn(mut commands: Commands) {
                     flex_direction: FlexDirection::Row,
                     align_items: AlignItems::Center,
                     margin: UiRect::vertical(Val::Px(5.)),
+                    border_radius: BorderRadius::all(Val::Percent(50.)),
                     ..Default::default()
                 },
-                BorderRadius::all(Val::Percent(50.)),
                 BackgroundColor(Color::Srgba(GRAY_700)),
             ),
             (
@@ -121,9 +114,9 @@ pub fn spawn(mut commands: Commands) {
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     margin: UiRect::vertical(Val::Px(5.)),
+                    border_radius: BorderRadius::all(Val::Percent(50.)),
                     ..Default::default()
                 },
-                BorderRadius::all(Val::Percent(50.)),
                 BackgroundColor(Color::Srgba(GRAY_500)),
             ),
             Node {
@@ -147,9 +140,9 @@ pub fn spawn(mut commands: Commands) {
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     margin: UiRect::vertical(Val::Px(5.)),
+                    border_radius: BorderRadius::all(Val::Percent(50.)),
                     ..Default::default()
                 },
-                BorderRadius::all(Val::Percent(50.)),
                 BackgroundColor(Color::Srgba(GRAY_500)),
             ),
             Node {
@@ -201,8 +194,8 @@ pub fn spawn(mut commands: Commands) {
 }
 
 pub fn despawn(mut commands: Commands, controls_query: Query<Entity, With<ControlsScreen>>) {
-    if let Ok(entity) = controls_query.get_single() {
-        commands.entity(entity).despawn_recursive();
+    if let Ok(entity) = controls_query.single() {
+        commands.entity(entity).despawn();
     }
 }
 
@@ -213,7 +206,7 @@ pub fn return_button_interaction(
     >,
     mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_main_menu_state.set(MainMenuState::Home);

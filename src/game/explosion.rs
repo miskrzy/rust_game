@@ -1,7 +1,6 @@
 use bevy::{
     app::Update,
-    ecs::schedule::IntoSystemConfigs,
-    prelude::{App, Plugin, Startup},
+    prelude::{App, IntoScheduleConfigs, Plugin, Startup},
     state::{condition::in_state, state::OnExit},
 };
 
@@ -23,7 +22,7 @@ pub struct ExplosionPlugin;
 
 impl Plugin for ExplosionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<Explode>()
+        app.add_message::<Explode>()
             .init_resource::<AssetHandles>()
             .add_systems(Startup, startup)
             .add_systems(OnExit(AppState::Game), despawn)

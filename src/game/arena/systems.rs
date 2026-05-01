@@ -22,7 +22,7 @@ pub fn spawn(
     asset_handles: Res<AssetHandles>,
     mut commands: Commands,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let arena_position = window.size() / 2.;
 
     let sprite = Sprite {
@@ -44,7 +44,7 @@ pub fn spawn(
 }
 
 pub fn despawn(arena_query: Query<Entity, With<Arena>>, mut commands: Commands) {
-    if let Ok(entity) = arena_query.get_single() {
+    if let Ok(entity) = arena_query.single() {
         commands.entity(entity).despawn();
     }
 }

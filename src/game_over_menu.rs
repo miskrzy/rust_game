@@ -1,6 +1,6 @@
 use bevy::{
     app::Update,
-    prelude::{in_state, App, IntoSystemConfigs, OnEnter, OnExit, Plugin},
+    prelude::{in_state, App, IntoScheduleConfigs, OnEnter, OnExit, Plugin},
 };
 
 mod components;

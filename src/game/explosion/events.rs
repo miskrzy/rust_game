@@ -1,6 +1,6 @@
-use bevy::prelude::{Event, Transform};
+use bevy::prelude::{Message, Transform};
 
-#[derive(Event)]
+#[derive(Message)]
 pub struct Explode {
     pub transform: Transform,
 }

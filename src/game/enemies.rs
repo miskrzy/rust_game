@@ -1,6 +1,7 @@
 use bevy::{
     prelude::{
-        in_state, App, Condition, IntoSystemConfigs, OnEnter, OnExit, Plugin, Startup, Update,
+        in_state, App, IntoScheduleConfigs, OnEnter, OnExit, Plugin, Startup, SystemCondition,
+        Update,
     },
     time::{Timer, TimerMode},
 };

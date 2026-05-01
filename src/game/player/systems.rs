@@ -11,7 +11,7 @@ use super::{
     components::{CastTimer, Health, Player},
     constants::HEALTH_REGEN,
 };
-use bevy::ecs::event::EventWriter;
+use bevy::ecs::message::MessageWriter;
 use bevy::{
     asset::AssetServer,
     input::ButtonInput,
@@ -32,7 +32,7 @@ pub fn spawn(
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_handles: Res<AssetHandles>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let x_position = window.width() / 2.;
     let y_position = window.height() / 2.;
     let z_position: f32 = SPRITE_DEPTH;
@@ -66,7 +66,7 @@ pub fn movement(
     mut player_query: Query<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    if let Ok(mut transform) = player_query.get_single_mut() {
+    if let Ok(mut transform) = player_query.single_mut() {
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.pressed(KeyCode::ArrowLeft) || keyboard_input.pressed(KeyCode::KeyA) {
@@ -94,8 +94,8 @@ pub fn restrict_movement(
     mut player_query: Query<&mut Transform, With<Player>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if let Ok(mut transform) = player_query.get_single_mut() {
-        let window = window_query.get_single().unwrap();
+    if let Ok(mut transform) = player_query.single_mut() {
+        let window = window_query.single().unwrap();
         let window_center = window.size() / 2.;
         let radius = SPRITE_DIAMETER / 2.0;
         let min_vec = Vec3 {
@@ -116,12 +116,12 @@ pub fn check_dead(
     player_query: Query<(&Health, &Score), With<Player>>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
-    mut final_score_events: EventWriter<FinalScore>,
+    mut final_score_events: MessageWriter<FinalScore>,
 ) {
-    if let Ok((health, score)) = player_query.get_single() {
+    if let Ok((health, score)) = player_query.single() {
         println!("check death");
         if health.is_dead() {
-            final_score_events.send(FinalScore { score: score.score });
+            final_score_events.write(FinalScore { score: score.score });
             next_game_state.set(GameState::None);
             next_app_state.set(AppState::GameOver);
         }
@@ -129,13 +129,13 @@ pub fn check_dead(
 }
 
 pub fn despawn(player_query: Query<Entity, With<Player>>, mut commands: Commands) {
-    if let Ok(entity) = player_query.get_single() {
+    if let Ok(entity) = player_query.single() {
         commands.entity(entity).despawn();
     }
 }
 
 pub fn regen(mut player_query: Query<&mut Health, With<Player>>, time: Res<Time>) {
-    if let Ok(mut health) = player_query.get_single_mut() {
+    if let Ok(mut health) = player_query.single_mut() {
         health.tick_regen(time.delta());
     }
 }
