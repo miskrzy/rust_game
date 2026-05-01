@@ -10,7 +10,7 @@ use super::components::GameCamera;
 use super::constants::{ARENA_HEIGHT_OFFSET, ARENA_WIDTH_OFFSET, DEPTH};
 
 pub fn spawn(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let x_position = window.width() / 2.;
     let y_position = window.height() / 2.;
     let z_position: f32 = DEPTH;
@@ -26,8 +26,8 @@ pub fn follow_player(
     player_query: Query<&Transform, With<Player>>,
     mut camera_query: Query<&mut Transform, (With<GameCamera>, Without<Player>)>,
 ) {
-    if let Ok(player_transform) = player_query.get_single() {
-        if let Ok(mut transform) = camera_query.get_single_mut() {
+    if let Ok(player_transform) = player_query.single() {
+        if let Ok(mut transform) = camera_query.single_mut() {
             transform.translation = player_transform.translation;
         }
     }
@@ -37,9 +37,9 @@ pub fn restrict_movement(
     mut camera_query: Query<&mut Transform, With<GameCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let window_position = window.size() / 2.;
-    if let Ok(mut transform) = camera_query.get_single_mut() {
+    if let Ok(mut transform) = camera_query.single_mut() {
         let min_vec = Vec3 {
             x: window_position.x - ARENA_WIDTH / 2. + (window_position.x - ARENA_WIDTH_OFFSET),
             y: window_position.y - ARENA_HEIGHT / 2. + (window_position.y - ARENA_HEIGHT_OFFSET),

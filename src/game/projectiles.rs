@@ -1,4 +1,4 @@
-use bevy::prelude::{in_state, App, IntoSystemConfigs, OnExit, Plugin, Startup, Update};
+use bevy::prelude::{in_state, App, IntoScheduleConfigs, OnExit, Plugin, Startup, Update};
 
 mod components;
 pub mod constants;

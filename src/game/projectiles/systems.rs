@@ -13,7 +13,7 @@ use super::{
 };
 use bevy::{
     asset::AssetServer,
-    ecs::event::EventWriter,
+    ecs::message::MessageWriter,
     math::{
         bounding::{BoundingCircle, IntersectsVolume},
         Vec2, Vec3,
@@ -34,9 +34,9 @@ pub fn spawn(
     mut commands: Commands,
     asset_handles: Res<AssetHandles>,
 ) {
-    if let Ok((mut cast_timer, player_transform)) = player_query.get_single_mut() {
+    if let Ok((mut cast_timer, player_transform)) = player_query.single_mut() {
         cast_timer.timer.tick(time.delta());
-        if cast_timer.timer.finished() {
+        if cast_timer.timer.is_finished() {
             let mut closest_enemy: (Option<Vec3>, f32) = (None, f32::INFINITY);
             for enemy_transform in enemy_query.iter() {
                 let player_enemy_distance = player_transform
@@ -76,11 +76,11 @@ pub fn movement(mut projectile_query: Query<(&mut Projectile, &mut Transform)>, 
 pub fn hit_target(
     projectile_query: Query<(&Projectile, &Transform, Entity)>,
     mut enemy_query: Query<(&Transform, &mut Health), With<Enemy>>,
-    mut explode_events: EventWriter<Explode>,
+    mut explode_events: MessageWriter<Explode>,
     mut commands: Commands,
 ) {
     for (projectile, transform, entity) in projectile_query.iter() {
-        if projectile.is_finished() {
+        if projectile.is_finish() {
             commands.entity(entity).despawn();
             continue;
         }
@@ -94,7 +94,7 @@ pub fn hit_target(
             if projectile_collider.intersects(&enemy_collider) {
                 commands.entity(entity).despawn();
                 enemy_health.deal_damage(DAMAGE);
-                explode_events.send(Explode {
+                explode_events.write(Explode {
                     transform: enemy_transform.clone(),
                 });
                 break;

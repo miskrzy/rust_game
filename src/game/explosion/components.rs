@@ -26,7 +26,7 @@ impl Explosion {
     }
 
     pub fn step(&mut self, time_delta: Duration) {
-        if self.timer.finished() {
+        if self.timer.is_finished() {
             if self.current_frame < self.total_frames {
                 self.current_frame += 1;
             } else if self.current_repetition < self.total_repetition {
@@ -42,11 +42,11 @@ impl Explosion {
     }
 
     pub fn hit(&self) -> bool {
-        self.timer.finished()
+        self.timer.is_finished()
     }
 
-    pub fn finished(&self) -> bool {
-        self.timer.finished()
+    pub fn finish(&self) -> bool {
+        self.timer.is_finished()
             && self.current_repetition == self.total_repetition
             && self.current_frame == self.total_frames
     }

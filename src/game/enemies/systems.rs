@@ -65,10 +65,10 @@ fn create_entity_bundle(
     texture: &Handle<Image>,
     player_query: &Query<&Transform, With<Player>>,
 ) -> (Sprite, Transform, Enemy, AttackTimer, Health) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let window_position = window.size() / 2.;
 
-    let (player_x, player_y) = if let Ok(player_transform) = player_query.get_single() {
+    let (player_x, player_y) = if let Ok(player_transform) = player_query.single() {
         (
             player_transform.translation.x,
             player_transform.translation.y,
@@ -133,7 +133,7 @@ pub fn spawn_over_time(
     player_query: Query<&Transform, With<Player>>,
 ) {
     spawn_timer.timer.tick(time.delta());
-    if spawn_timer.timer.finished() {
+    if spawn_timer.timer.is_finished() {
         commands.spawn(create_entity_bundle(
             &window_query,
             &asset_handles.texture,
@@ -147,7 +147,7 @@ pub fn movement(
     player_query: Query<&Transform, With<Player>>,
     time: Res<Time>,
 ) {
-    if let Ok(player_transform) = player_query.get_single() {
+    if let Ok(player_transform) = player_query.single() {
         for mut transform in enemy_query.iter_mut() {
             transform.translation = transform.translation.move_towards(
                 player_transform.translation.with_z(SPRITE_DEPTH),
@@ -161,7 +161,7 @@ pub fn restrict_movement(
     mut enemy_query: Query<&mut Transform, With<Enemy>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
     let window_center = window.size() / 2.;
     let radius = SPRITE_DIAMETER / 2.;
 
@@ -185,7 +185,7 @@ pub fn attack_player(
     mut player_query: Query<(&Transform, &mut Health), With<Player>>,
     time: Res<Time>,
 ) {
-    if let Ok((player_transform, mut player_health)) = player_query.get_single_mut() {
+    if let Ok((player_transform, mut player_health)) = player_query.single_mut() {
         let player_collider = BoundingCircle::new(
             player_transform.translation.truncate(),
             PLAYER_SPRITE_DIAMETER / 2.,
@@ -196,7 +196,7 @@ pub fn attack_player(
 
             let collider =
                 BoundingCircle::new(transform.translation.truncate(), SPRITE_DIAMETER / 2.);
-            if collider.intersects(&player_collider) && attack_timer.timer.finished() {
+            if collider.intersects(&player_collider) && attack_timer.timer.is_finished() {
                 player_health.deal_damage(DAMAGE);
                 println!("Player received {DAMAGE} damage");
                 attack_timer.timer.reset();
@@ -213,7 +213,7 @@ pub fn despawn_dead(
     for (entity, health) in enemy_query.iter() {
         if health.is_dead() {
             commands.entity(entity).despawn();
-            if let Ok(mut score) = player_query.get_single_mut() {
+            if let Ok(mut score) = player_query.single_mut() {
                 score.score += 1;
             }
         }

@@ -9,12 +9,12 @@ use super::constants::{
 use super::events::Explode;
 use super::resources::AssetHandles;
 use bevy::color::Alpha;
-use bevy::ecs::event::EventReader;
+use bevy::ecs::message::MessageReader;
 use bevy::ecs::query::With;
 use bevy::ecs::system::ResMut;
 use bevy::math::bounding::{BoundingCircle, IntersectsVolume};
 use bevy::math::{UVec2, Vec2};
-use bevy::sprite::{TextureAtlas, TextureAtlasLayout};
+use bevy::image::{TextureAtlas, TextureAtlasLayout};
 use bevy::time::Time;
 use bevy::{
     asset::{AssetServer, Assets},
@@ -30,7 +30,7 @@ pub fn spawn(
     asset_handles: Res<AssetHandles>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut commands: Commands,
-    mut explode_events: EventReader<Explode>,
+    mut explode_events: MessageReader<Explode>,
 ) {
     let layout = TextureAtlasLayout::from_grid(
         UVec2::splat(TEXTURE_SIZE),
@@ -104,7 +104,7 @@ pub fn hit_targets(
 
 pub fn despawn_on_finish(explosion_query: Query<(Entity, &Explosion)>, mut commands: Commands) {
     for (entity, explosion) in explosion_query.iter() {
-        if explosion.finished() {
+        if explosion.finish() {
             commands.entity(entity).despawn();
         }
     }

@@ -3,11 +3,8 @@ use bevy::{
         palettes::css::{BLACK, GRAY, WHITE},
         Color,
     },
-    ecs::event::EventReader,
-    prelude::{
-        BuildChildren, Button, Changed, ChildBuild, Commands, DespawnRecursiveExt, Entity,
-        NextState, Node, Query, ResMut, Text, With,
-    },
+    ecs::message::MessageReader,
+    prelude::{Button, Changed, Commands, Entity, NextState, Node, Query, ResMut, Text, With},
     text::TextColor,
     ui::{
         AlignItems, BackgroundColor, BorderColor, BorderRadius, Display, FlexDirection,
@@ -23,7 +20,7 @@ use crate::game::player::events::FinalScore;
 use crate::states::AppState;
 use crate::{game::states::GameState, main_menu::states::MainMenuState};
 
-pub fn spawn(mut commands: Commands, mut final_score_events: EventReader<FinalScore>) {
+pub fn spawn(mut commands: Commands, mut final_score_events: MessageReader<FinalScore>) {
     let final_score = if let Some(final_score) = final_score_events.read().last() {
         final_score.score.to_string()
     } else {
@@ -64,11 +61,11 @@ pub fn spawn(mut commands: Commands, mut final_score_events: EventReader<FinalSc
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::vertical(Val::Px(10.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         Button,
         RestartButton,
     );
@@ -87,11 +84,11 @@ pub fn spawn(mut commands: Commands, mut final_score_events: EventReader<FinalSc
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::vertical(Val::Px(10.)),
+            border_radius: BorderRadius::all(Val::Percent(50.)),
             ..Default::default()
         },
         BackgroundColor(BUTTON_COLOR),
-        BorderColor(Color::Srgba(BLACK)),
-        BorderRadius::all(Val::Percent(50.)),
+        BorderColor::all(Color::Srgba(BLACK)),
         Button,
         MenuButton,
     );
@@ -120,8 +117,8 @@ pub fn spawn(mut commands: Commands, mut final_score_events: EventReader<FinalSc
 }
 
 pub fn despawn(mut commands: Commands, pause_menu_query: Query<Entity, With<GameOverMenu>>) {
-    if let Ok(entity) = pause_menu_query.get_single() {
-        commands.entity(entity).despawn_recursive();
+    if let Ok(entity) = pause_menu_query.single() {
+        commands.entity(entity).despawn();
     }
 }
 
@@ -133,7 +130,7 @@ pub fn restart_button_interaction(
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_game_state.set(GameState::Play);
@@ -158,7 +155,7 @@ pub fn menu_button_interaction(
     mut next_main_menu_state: ResMut<NextState<MainMenuState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+    if let Ok((interaction, mut background_color)) = button_query.single_mut() {
         match *interaction {
             Interaction::Pressed => {
                 next_app_state.set(AppState::MainMenu);

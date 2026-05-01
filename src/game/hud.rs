@@ -1,5 +1,5 @@
 use bevy::app::Update;
-use bevy::prelude::{in_state, App, IntoSystemConfigs, OnEnter};
+use bevy::prelude::{in_state, App, IntoScheduleConfigs, OnEnter};
 use bevy::prelude::{OnExit, Plugin};
 
 mod components;

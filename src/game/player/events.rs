@@ -1,6 +1,6 @@
-use bevy::prelude::Event;
+use bevy::prelude::Message;
 
-#[derive(Event)]
+#[derive(Message)]
 pub struct FinalScore {
     pub score: u16,
 }

@@ -5,8 +5,7 @@ use super::{
     components::{GreenHealthBar, HUDNode, RedHealthBar, ScoreText},
     constants::HEALTH_BAR_LENGTH,
 };
-use bevy::hierarchy::ChildBuild;
-use bevy::prelude::{DespawnRecursiveExt, Entity};
+use bevy::prelude::Entity;
 use bevy::text::TextColor;
 use bevy::ui::{AlignItems, FlexDirection, JustifyContent, UiRect};
 use bevy::{
@@ -17,7 +16,7 @@ use bevy::{
         },
         Color,
     },
-    prelude::{BuildChildren, Commands, Node, Query, Text, With, Without},
+    prelude::{Commands, Node, Query, Text, With, Without},
     ui::{BackgroundColor, Display, PositionType, Val},
 };
 
@@ -99,14 +98,14 @@ pub fn update_health_bar(
     mut green_health_bar_query: Query<&mut Node, (With<GreenHealthBar>, Without<RedHealthBar>)>,
     mut red_health_bar_query: Query<&mut Node, (With<RedHealthBar>, Without<GreenHealthBar>)>,
 ) {
-    if let Ok(player_health) = player_query.get_single() {
+    if let Ok(player_health) = player_query.single() {
         let current = player_health.current();
         let max = player_health.max();
         let fraction_green = current / max;
         let fraction_red = (max - current) / max;
         if let (Ok(mut green_bar), Ok(mut red_bar)) = (
-            green_health_bar_query.get_single_mut(),
-            red_health_bar_query.get_single_mut(),
+            green_health_bar_query.single_mut(),
+            red_health_bar_query.single_mut(),
         ) {
             green_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_green);
             red_bar.width = Val::Px(HEALTH_BAR_LENGTH * fraction_red);
@@ -118,13 +117,13 @@ pub fn update_score(
     mut score_node: Query<&mut Text, With<ScoreText>>,
     player_query: Query<&Score, With<Player>>,
 ) {
-    if let (Ok(mut text), Ok(score)) = (score_node.get_single_mut(), player_query.get_single()) {
+    if let (Ok(mut text), Ok(score)) = (score_node.single_mut(), player_query.single()) {
         text.0 = score.score.to_string();
     }
 }
 
 pub fn despawn(hud_query: Query<Entity, With<HUDNode>>, mut commands: Commands) {
-    if let Ok(entity) = hud_query.get_single() {
-        commands.entity(entity).despawn_recursive();
+    if let Ok(entity) = hud_query.single() {
+        commands.entity(entity).despawn();
     }
 }
