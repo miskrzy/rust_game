@@ -1,5 +1,5 @@
 use bevy::{
-    math::Vec3,
+    math::{Vec2, Vec3},
     prelude::{Camera2d, Commands, Query, Transform, Window, With, Without},
     window::PrimaryWindow,
 };
@@ -38,16 +38,26 @@ pub fn restrict_movement(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.single().unwrap();
-    let window_position = window.size() / 2.;
+    let window_center = window.size() / 2.;
+    let window_size = window.size();
+    let arena_size = Vec2::new(ARENA_WIDTH, ARENA_HEIGHT);
+    let bottom_left_arena_corner = window_center - (arena_size / 2.);
+    let top_right_arena_corner = window_center + (arena_size / 2.);
+    let camera_min_shift_from_edge =
+        window_size / 2. - Vec2::new(ARENA_WIDTH_OFFSET, ARENA_HEIGHT_OFFSET);
+    let bottom_left_camera_limit =
+        (bottom_left_arena_corner + camera_min_shift_from_edge).min(window_center);
+    let top_right_camera_limit =
+        (top_right_arena_corner - camera_min_shift_from_edge).max(window_center);
     if let Ok(mut transform) = camera_query.single_mut() {
         let min_vec = Vec3 {
-            x: window_position.x - ARENA_WIDTH / 2. + (window_position.x - ARENA_WIDTH_OFFSET),
-            y: window_position.y - ARENA_HEIGHT / 2. + (window_position.y - ARENA_HEIGHT_OFFSET),
+            x: bottom_left_camera_limit.x,
+            y: bottom_left_camera_limit.y,
             z: DEPTH,
         };
         let max_vec = Vec3 {
-            x: window_position.x + ARENA_WIDTH / 2. - (window_position.x - ARENA_WIDTH_OFFSET),
-            y: window_position.y + ARENA_HEIGHT / 2. - (window_position.y - ARENA_HEIGHT_OFFSET),
+            x: top_right_camera_limit.x,
+            y: top_right_camera_limit.y,
             z: DEPTH,
         };
         transform.translation = transform.translation.clamp(min_vec, max_vec);
