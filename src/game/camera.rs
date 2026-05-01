@@ -1,6 +1,6 @@
 use bevy::{
     app::{Startup, Update},
-    prelude::{in_state, Plugin, IntoScheduleConfigs},
+    prelude::{in_state, IntoScheduleConfigs, Plugin},
 };
 use systems::{follow_player, restrict_movement, spawn};
 

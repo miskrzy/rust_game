@@ -119,7 +119,6 @@ pub fn check_dead(
     mut final_score_events: MessageWriter<FinalScore>,
 ) {
     if let Ok((health, score)) = player_query.single() {
-        println!("check death");
         if health.is_dead() {
             final_score_events.write(FinalScore { score: score.score });
             next_game_state.set(GameState::None);
